@@ -2,7 +2,7 @@
   "name": "event_study",
   "version": "1.0.0",
   "description": "event study package",
-  "main": "index.js",
+  "main": "server.js",
   "scripts": {
     "test": "jest"
   },
@@ -13,12 +13,16 @@
     "@babel/preset-env": "^7.4.4",
     "babel-jest": "^24.8.0",
     "jest": "^24.8.0",
-    "standard": "^12.0.1"
+    "standard": "^12.0.1",
+    "supertest": "^4.0.2"
   },
   "dependencies": {
+    "body-parser": "^1.19.0",
     "csvtojson": "^2.0.8",
+    "express": "^4.17.1",
     "moment": "^2.24.0",
     "ramda": "^0.26.1",
-    "regression": "^2.0.1"
+    "regression": "^2.0.1",
+    "validate": "^4.5.1"
   }
 }

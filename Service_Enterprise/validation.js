@@ -2,6 +2,27 @@ import moment from 'moment'
 import partition from 'ramda/src/partition'
 import findIndex from 'ramda/src/findIndex'
 import propEq from 'ramda/src/propEq'
+import Schema from 'validate'
+
+// Schemas
+const validMarketModelRequestSchema = new Schema({
+  dataCalendar: {
+    type: Array,
+    required: true
+  },
+  dataMarket: {
+    type: Array,
+    required: true
+  },
+  dataStock: {
+    type: Array,
+    required: true
+  },
+  timeline: {
+    type: Object,
+    required: true
+  }
+})
 
 const isValidDate = (d, f) => moment(d, f).isValid()
 
@@ -36,3 +57,10 @@ export const hasValidCalendar = (data, calendar, timeline, dateProp = 'date') =>
   const [, invalids] = partition(date => hasEnoughItems(data, date), calendar)
   return invalids
 }
+
+/**
+  Check is request valid market model schema
+  @param {object} request
+  @return {array} - array of errors
+*/
+export const hasValidMarketModelRequestSchema = request => validMarketModelRequestSchema.validate(request)

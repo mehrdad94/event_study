@@ -1,5 +1,5 @@
 /* global it expect */
-import { hasAllValidDate, hasValidCalendar } from './validation.js'
+import { hasAllValidDate, hasValidCalendar, hasValidMarketModelRequestSchema } from './validation.js'
 
 // validate dates
 it('Should check all content has valid date otherwise return invalids', function () {
@@ -49,4 +49,24 @@ it('Should check all event dates has enough stock data', function () {
 
   calendar.push({ date: '2016-12-11' })
   expect(hasValidCalendar(data, calendar, timeline)[1].date).toBe('2016-12-11')
+})
+
+it('Should check a request has all valid fields for market model analysis', function () {
+  const invalidRequest = {
+    dataCalendar: [],
+    dataMarket: {},
+    dataStock: 2
+  }
+
+  // should produce three error
+  expect(hasValidMarketModelRequestSchema(invalidRequest).length).toBe(3)
+
+  const validRequest = {
+    dataCalendar: [],
+    dataMarket: [],
+    dataStock: [],
+    timeline: {}
+  }
+
+  expect(hasValidMarketModelRequestSchema(validRequest).length).toBe(0)
 })
