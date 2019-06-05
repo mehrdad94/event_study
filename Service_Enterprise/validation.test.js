@@ -1,5 +1,5 @@
 /* global it expect */
-import { hasAllValidDate, hasValidCalendar, hasValidMarketModelRequestSchema } from './validation.js'
+import { hasAllValidDate, hasValidCalendar, ValidateMarketModel } from './validation.js'
 
 // validate dates
 it('Should check all content has valid date otherwise return invalids', function () {
@@ -51,22 +51,45 @@ it('Should check all event dates has enough stock data', function () {
   expect(hasValidCalendar(data, calendar, timeline)[1].date).toBe('2016-12-11')
 })
 
-it('Should check a request has all valid fields for market model analysis', function () {
-  const invalidRequest = {
-    dataCalendar: [],
-    dataMarket: {},
-    dataStock: 2
+it('should api check for market model request', function () {
+  const invalid = {
+    dataCalendar: {},
+    dataMarket: ''
   }
 
-  // should produce three error
-  expect(hasValidMarketModelRequestSchema(invalidRequest).length).toBe(3)
-
-  const validRequest = {
+  expect(ValidateMarketModel(invalid).length === 0).toBe(false)
+  const invalid2 = {
     dataCalendar: [],
     dataMarket: [],
     dataStock: [],
     timeline: {}
   }
+  expect(ValidateMarketModel(invalid2).length === 0).toBe(false)
 
-  expect(hasValidMarketModelRequestSchema(validRequest).length).toBe(0)
+  const invalid3 = {
+    dataCalendar: [{ Date: '' }],
+    dataMarket: [{ Close: '' }],
+    dataStock: [{ Close: '' }],
+    timeline: {
+      T0T1: 1,
+      T1E: 1,
+      T2T3: 1
+    }
+  }
+  expect(ValidateMarketModel(invalid3).length === 0).toBe(false)
+
+  const valid = {
+    dataCalendar: [{ Date: '111' }],
+    dataMarket: [{ Date: '111', Close: '1234' }],
+    dataStock: [{ Date: '111', Close: '4321' }],
+    timeline: {
+      T0T1: 1,
+      T1E: 1,
+      ET2: 1,
+      T2T3: 1
+    },
+    operationField: 'Close',
+    dateField: 'Date'
+  }
+  expect(ValidateMarketModel(valid).length === 0).toBe(true)
 })

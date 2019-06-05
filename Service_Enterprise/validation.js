@@ -2,27 +2,8 @@ import moment from 'moment'
 import partition from 'ramda/src/partition'
 import findIndex from 'ramda/src/findIndex'
 import propEq from 'ramda/src/propEq'
-import Schema from 'validate'
-
-// Schemas
-const validMarketModelRequestSchema = new Schema({
-  dataCalendar: {
-    type: Array,
-    required: true
-  },
-  dataMarket: {
-    type: Array,
-    required: true
-  },
-  dataStock: {
-    type: Array,
-    required: true
-  },
-  timeline: {
-    type: Object,
-    required: true
-  }
-})
+import is from 'ramda/src/is'
+import isNil from 'ramda/src/isNil'
 
 const isValidDate = (d, f) => moment(d, f).isValid()
 
@@ -51,16 +32,47 @@ export const hasValidCalendar = (data, calendar, timeline, dateProp = 'date') =>
     const dataLength = data.length
     if (index === -1) return false
     else if (timeline['T0T1'] + timeline['T1E'] - 1 > index) return false
-    else if (dataLength - 1 - index < timeline['ET2'] + timeline['T2T3']) return false
-    else return true
+    else return dataLength - 1 - index >= timeline['ET2'] + timeline['T2T3']
   }
   const [, invalids] = partition(date => hasEnoughItems(data, date), calendar)
   return invalids
 }
 
+const isValidDataMarket = ({ dataMarket, operationField, dateField }) => {
+  return (!isNil(dataMarket) &&
+          is(Array, dataMarket)) &&
+          dataMarket.length > 0 &&
+          dataMarket.every(item => is(String, item[operationField]) && is(String, item[dateField]))
+}
+const isValidDataStock = ({ dataStock, operationField, dateField }) => {
+  return (!isNil(dataStock) &&
+    is(Array, dataStock)) &&
+    dataStock.length > 0 &&
+    dataStock.every(item => is(String, item[operationField]) && is(String, item[dateField]))
+}
+const isValidDataCalendar = ({ dataMarket, dateField }) => {
+  return (!isNil(dataMarket) &&
+    is(Array, dataMarket)) &&
+    dataMarket.length > 0 &&
+    dataMarket.every(item => is(String, item[dateField]))
+}
+const isValidTimeline = ({ timeline }) => {
+  return (!isNil(timeline) &&
+          is(Number, timeline['T0T1']) &&
+          is(Number, timeline['T1E']) &&
+          is(Number, timeline['ET2']) &&
+          is(Number, timeline['T2T3']))
+}
 /**
-  Check is request valid market model schema
-  @param {object} request
-  @return {array} - array of errors
-*/
-export const hasValidMarketModelRequestSchema = request => validMarketModelRequestSchema.validate(request)
+ Check api request information for market model request
+ @param {object} data - data to validate
+ @return {object} - validated object
+ */
+export const ValidateMarketModel = (data) => {
+  if (isNil(data)) return 'You should provide value'
+  else if (!isValidDataCalendar(data)) return 'Invalid Data Calendar'
+  else if (!isValidTimeline(data)) return 'Invalid Timeline'
+  else if (!isValidDataMarket(data)) return 'Invalid Market Data'
+  else if (!isValidDataStock(data)) return 'Invalid Data Stock'
+  else return ''
+}
