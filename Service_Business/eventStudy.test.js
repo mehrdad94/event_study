@@ -5,7 +5,10 @@ import {
   returnsAbnormal,
   testStatistic,
   testSignificant,
-  returnsAbnormalCumulative
+  returnsAbnormalCumulative,
+  extractDateWindows,
+  returnsDaily,
+  marketModel
 } from './eventStudy'
 
 it('should test standard error', function () {
@@ -47,4 +50,88 @@ it('should cumulative returns', function () {
   const abnormalReturns = [1, 1, 1]
 
   expect(returnsAbnormalCumulative(abnormalReturns).toString()).toBe('1,2,3')
+})
+
+it('should calculate daily returns', function () {
+  const endValues = [2, 2, 3, 4] // $
+  const result = [0, (3 / 2) - 1, (4 / 3) - 1]
+
+  expect(returnsDaily(endValues).toString()).toBe(result.toString())
+
+  const endValues2 = [{ Close: 2 }, { Close: 2 }, { Close: 3 }, { Close: 4 }]
+
+  const result2 = [{ Close: 2, return: 0 }, { Close: 3, return: (3 / 2) - 1 }, { Close: 4, return: (4 / 3) - 1 }]
+
+  expect(JSON.stringify(returnsDaily(endValues2, 'Close'))).toBe(JSON.stringify(result2))
+})
+
+it('should test date extraction', function () {
+  const fakeDateGen = n => ({ Date: n.toString() })
+  const lookupDate = '3'
+  const stockAndMarketData = [fakeDateGen(1), fakeDateGen(2), fakeDateGen(3), fakeDateGen(4), fakeDateGen(5)]
+  const timeline = {
+    T0T1: 1,
+    T1E: 1,
+    ET2: 1,
+    T2T3: 1
+  }
+
+  const result = extractDateWindows({
+    date: lookupDate,
+    stockData: stockAndMarketData,
+    marketData: stockAndMarketData,
+    timeline,
+    dateField: 'Date'
+  })
+
+  expect(result.marketEstimationWindow.length).toBe(1)
+  expect(result.marketEventWindow.length).toBe(2)
+  expect(result.marketPostEventWindow.length).toBe(1)
+})
+
+it('Should compute Market model', function () {
+  const fakeStockDataGen = n => ({ Date: n, Close: 2 ** n })
+  const state = {
+    dataCalendar: [{ Date: 6 }],
+    dataMarket: [
+      fakeStockDataGen(1),
+      fakeStockDataGen(2),
+      fakeStockDataGen(3),
+      fakeStockDataGen(4),
+      fakeStockDataGen(5),
+      fakeStockDataGen(6),
+      fakeStockDataGen(7),
+      fakeStockDataGen(8),
+      fakeStockDataGen(9),
+      fakeStockDataGen(10),
+      fakeStockDataGen(11)],
+    dataStock: [
+      fakeStockDataGen(1),
+      fakeStockDataGen(2),
+      fakeStockDataGen(3),
+      fakeStockDataGen(4),
+      fakeStockDataGen(5),
+      fakeStockDataGen(6),
+      fakeStockDataGen(7),
+      fakeStockDataGen(8),
+      fakeStockDataGen(9),
+      fakeStockDataGen(10),
+      fakeStockDataGen(11)],
+    timeline: {
+      T0T1: 2,
+      T1E: 2,
+      ET2: 2,
+      T2T3: 2
+    },
+    operationField: 'Close',
+    dateField: 'Date'
+  }
+
+  const result = marketModel(state).resultPerDates[6]
+
+  expect(result.eventWindowsNormalReturn.toString()).toBe('1,1,1,1')
+  expect(result.eventWindowsAbnormalReturn.toString()).toBe('0,0,0,0')
+  expect(result.eventWindowStatisticalTest.toString()).toBe('NaN,NaN,NaN,NaN')
+  expect(result.eventWindowSignificantTest.toString()).toBe('false,false,false,false')
+  // @todo calculate cumulative abnormal return
 })

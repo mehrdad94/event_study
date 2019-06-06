@@ -42,13 +42,13 @@ const isValidDataMarket = ({ dataMarket, operationField, dateField }) => {
   return (!isNil(dataMarket) &&
           is(Array, dataMarket)) &&
           dataMarket.length > 0 &&
-          dataMarket.every(item => is(String, item[operationField]) && is(String, item[dateField]))
+          dataMarket.every(item => is(Number, item[operationField]) && is(String, item[dateField]))
 }
 const isValidDataStock = ({ dataStock, operationField, dateField }) => {
   return (!isNil(dataStock) &&
     is(Array, dataStock)) &&
     dataStock.length > 0 &&
-    dataStock.every(item => is(String, item[operationField]) && is(String, item[dateField]))
+    dataStock.every(item => is(Number, item[operationField]) && is(String, item[dateField]))
 }
 const isValidDataCalendar = ({ dataMarket, dateField }) => {
   return (!isNil(dataMarket) &&
@@ -67,9 +67,12 @@ const isValidTimeline = ({ timeline }) => {
  Check api request information for market model request
  @param {object} data - data to validate
  @return {object} - validated object
+ @todo refactor validation to accept a schema then do the rest of it
  */
 export const ValidateMarketModel = (data) => {
   if (isNil(data)) return 'You should provide value'
+  else if (isNil(data.operationField)) return 'Operation filed should not be empty'
+  else if (isNil(data.dateField)) return 'Date field should not be empty'
   else if (!isValidDataCalendar(data)) return 'Invalid Data Calendar'
   else if (!isValidTimeline(data)) return 'Invalid Timeline'
   else if (!isValidDataMarket(data)) return 'Invalid Market Data'

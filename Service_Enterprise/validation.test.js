@@ -80,8 +80,8 @@ it('should api check for market model request', function () {
 
   const valid = {
     dataCalendar: [{ Date: '111' }],
-    dataMarket: [{ Date: '111', Close: '1234' }],
-    dataStock: [{ Date: '111', Close: '4321' }],
+    dataMarket: [{ Date: '111', Close: 1234 }],
+    dataStock: [{ Date: '111', Close: 4321 }],
     timeline: {
       T0T1: 1,
       T1E: 1,
