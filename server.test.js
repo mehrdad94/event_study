@@ -1,7 +1,7 @@
 /* global it */
 import { app } from './server'
 const request = require('supertest')
-
+// @todo add more test to validate event study module
 // helper
 const fakeStockDataGenerator = n => ({ Date: `${n}`, Close: 2 ** n })
 const seqGenerator = n => n !== 1 ? [...seqGenerator(n - 1), n] : [n]
@@ -18,6 +18,7 @@ const timeline = {
 }
 const operationField = 'Close'
 const dateField = 'Date'
+
 it('Should test market model service with invalid request params', function (done) {
   // missed the timeline
   const invalidBody = {

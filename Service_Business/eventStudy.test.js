@@ -2,6 +2,7 @@
 import {
   regressionStandardError,
   normalReturns,
+  addReturns,
   returnsAbnormal,
   testStatistic,
   testSignificant,
@@ -57,14 +58,18 @@ it('should calculate daily returns', function () {
   const result = [0, (3 / 2) - 1, (4 / 3) - 1]
 
   expect(returnsDaily(endValues).toString()).toBe(result.toString())
-
-  const endValues2 = [{ Close: 2 }, { Close: 2 }, { Close: 3 }, { Close: 4 }]
-
-  const result2 = [{ Close: 2, return: 0 }, { Close: 3, return: (3 / 2) - 1 }, { Close: 4, return: (4 / 3) - 1 }]
-
-  expect(JSON.stringify(returnsDaily(endValues2, 'Close'))).toBe(JSON.stringify(result2))
 })
 
+it('should add return prop to list of prices', function () {
+  const operationField = 'Close'
+  const fakePriceGen = n => ({ [operationField]: n })
+  const data = [fakePriceGen(2), fakePriceGen(2)]
+  const result = addReturns(data, operationField)
+  expect(result[0]).toEqual({
+    [operationField]: 2,
+    Return: 0
+  })
+})
 it('should test date extraction', function () {
   const fakeDateGen = n => ({ Date: n.toString() })
   const lookupDate = '3'
@@ -92,7 +97,7 @@ it('should test date extraction', function () {
 it('Should compute Market model', function () {
   const fakeStockDataGen = n => ({ Date: n, Close: 2 ** n })
   const state = {
-    dataCalendar: [{ Date: 6 }],
+    dataCalendar: 6,
     dataMarket: [
       fakeStockDataGen(1),
       fakeStockDataGen(2),
@@ -127,11 +132,11 @@ it('Should compute Market model', function () {
     dateField: 'Date'
   }
 
-  const result = marketModel(state).resultPerDates[6]
+  const result = marketModel(state)
 
-  expect(result.eventWindowsNormalReturn.toString()).toBe('1,1,1,1')
-  expect(result.eventWindowsAbnormalReturn.toString()).toBe('0,0,0,0')
-  expect(result.eventWindowStatisticalTest.toString()).toBe('NaN,NaN,NaN,NaN')
-  expect(result.eventWindowSignificantTest.toString()).toBe('false,false,false,false')
+  expect(result.normalReturn.toString()).toBe('1,1,1,1')
+  expect(result.abnormalReturn.toString()).toBe('0,0,0,0')
+  expect(result.statisticalTest.toString()).toBe('NaN,NaN,NaN,NaN')
+  expect(result.significantTest.toString()).toBe('false,false,false,false')
   // @todo calculate cumulative abnormal return
 })

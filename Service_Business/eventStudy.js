@@ -9,29 +9,10 @@ import propEq from 'ramda/src/propEq'
 import findIndex from 'ramda/src/findIndex'
 import slice from 'ramda/src/slice'
 import prop from 'ramda/src/prop'
-import pick from 'ramda/src/pick'
-import values from 'ramda/src/values'
-import indexBy from 'ramda/src/indexBy'
+import map from 'ramda/src/map'
 import mapObjIndexed from 'ramda/src/mapObjIndexed'
-import groupBy from 'ramda/src/groupBy'
 
-const zipMany = array => {
-  const result = []
-  if (!array || !array[0] || !Array.isArray(array[0])) return result
-  const len = array[0].length
-
-  for (let i = 0; i < len; i++) {
-    const temp = []
-    for (let j = 0; j < array.length; j++) {
-      temp.push(array[j][i])
-
-      if (j === array.length - 1) result.push(temp)
-    }
-  }
-
-  return result
-}
-
+const RETURN_PROP = 'Return'
 /**
  * Calculate standard regression error
  * @param {array} y - y points
@@ -66,26 +47,28 @@ export const regressionStandardError = (y, x) => {
 
 /**
  * Calculate daily returns
- * @param {array} endValues - list of prices
- * @param {string} [prop] - property for array objects
- * @param {string} [storeProp] - return the object with that key in it
+ * @param {array} prices - list of prices
  * @returns {array}
  */
-export const returnsDaily = (endValues, prop, storeProp = 'return') => {
+export const returnsDaily = prices => {
   const isNotNaN = x => !isNaN(x)
-  const inNotNaNObject = (x, prop) => !isNaN(x[prop])
-  if (typeof endValues[0] === 'object') {
-    return endValues.map((v, i, a) => {
-      if (i === 0) return Object.assign({}, v, { [storeProp]: NaN })
-      const returnVal = (v[prop] / a[i - 1][prop]) - 1
-
-      return Object.assign({}, v, { [storeProp]: returnVal })
-    }).filter(item => inNotNaNObject(item, storeProp))
-  } else {
-    return endValues.map((v, i, a) => (v / a[i - 1]) - 1).filter(isNotNaN)
-  }
+  return prices.map((v, i, a) => (v / a[i - 1]) - 1).filter(isNotNaN)
 }
 
+/**
+ * Add return prop to a list of prices
+ * @param {array} data
+ * @param {string} operationField
+ * @returns {array}
+ */
+export const addReturns = (data, operationField) => {
+  const getOperationField = prop(operationField)
+  const returns = returnsDaily(data.map(getOperationField))
+  return returns.map((item, index) => ({
+    ...data[index + 1],
+    [RETURN_PROP]: item
+  }))
+}
 /**
  * Calculate normal returns from observation market returns
  * @param {array} marketReturns - market returns for calculating CAPM regression
@@ -141,15 +124,10 @@ export const returnsAbnormalCumulative = AR => AR.reduce((a, b, i) => {
  * @param stockData {array<object>} - stock information
  * @param marketData {array<object>} - market information
  * @param timeline {object} - timeline properties
- * @param dateField {string} - date field in json data
- * @param [aggregate] {function} - it will apply to end window results
  * @return {object}
  */
-export const extractDateWindows = ({ date, stockData, marketData, timeline, dateField }) => {
+export const extractDateWindows = ({ indexStock, indexMarket, stockData, marketData, timeline }) => {
   const { T0T1, T1E, ET2, T2T3 } = timeline
-  const findDateIndex = findIndex(propEq(dateField, date))
-  const indexStock = findDateIndex(stockData)
-  const indexMarket = findDateIndex(marketData)
 
   const indexesStockEstimationWindow = [indexStock - T1E - T0T1 + 1, indexStock - T1E + 1]
   const indexesMarketEstimationWindow = [indexMarket - T1E - T0T1 + 1, indexMarket - T1E + 1]
@@ -187,129 +165,62 @@ export const extractDateWindows = ({ date, stockData, marketData, timeline, date
  * @param dataStock {array}
  * @param dataMarket {array}
  * @param timeline {object}
- * @return {{dates: {array}, resultPerDates: {object}}}
+ * @return {object}
+ * @todo refactor this function to simpler form
  */
-export const marketModel = ({ dateField, operationField, dataCalendar, dataStock, dataMarket, timeline }) => {
-  const RETURN = 'RETURN'
-  const NORMAL_RETURN = 'NORMAL_RETURN'
-  const ABNORMAL_RETURN = 'ABNORMAL_RETURN'
-  const CAR = 'CAR'
-  const STATISTICAL_TEST = 'STATISTICAL_TEST'
-  const SIGNIFICANT_TEST = 'SIGNIFICANT_TEST'
+export const marketModel = ({ dataCalendar, dataStock, dataMarket, timeline, dateField, operationField }) => {
+  // helpers
+  const getReturnField = prop(RETURN_PROP)
+  const mapByReturnField = map(getReturnField)
+  const findDateIndex = findIndex(propEq(dateField, dataCalendar))
 
-  const dateProp = prop(dateField)
-  const returnProp = prop(RETURN)
-  const indexByDate = dateField => indexBy(prop(dateField))
-  const dates = dataCalendar.map(prop(dateField))
-  const getRegressionError = ({ stockEstimationWindow, marketEstimationWindow }) => {
-    return regressionStandardError(stockEstimationWindow, marketEstimationWindow)
-  }
+  // add return prop to stock and market data
+  const dataStockWithReturns = addReturns(dataStock, operationField)
+  const dataMarketWithReturns = addReturns(dataMarket, operationField)
 
-  const getReturns = data => data.map(returnProp)
+  // extract timeline window from stock and market data
+  const dateIndexStock = findDateIndex(dataStockWithReturns)
+  const dateIndexMarket = findDateIndex(dataMarketWithReturns)
 
-  const calcNormalReturn = ({ stockEstimationWindow, marketEstimationWindow, marketEventWindow }) => {
-    return normalReturns(marketEstimationWindow, stockEstimationWindow, marketEventWindow)
-  }
-
-  const calcAbnormalReturn = ({ stockEventWindow }, normalReturn) => {
-    return returnsAbnormal(stockEventWindow, normalReturn)
-  }
-
-  const calcStatisticTest = (RT, index) => {
-    return testStatistic(RT, regressionStandardErrors[index])
-  }
-
-  const stockData = returnsDaily(dataStock, operationField, RETURN)
-  const marketData = values(pick(stockData.map(dateProp), indexByDate(dateField)(returnsDaily(dataMarket, operationField, RETURN))))
-  // remove mismatch dates from market data with stock data
-  const windowsPerDate = dates.map(date => extractDateWindows({
-    date,
-    stockData,
-    marketData,
+  const timelineWindows = extractDateWindows({
+    date: dataCalendar,
+    stockData: dataStockWithReturns,
+    marketData: dataMarketWithReturns,
+    indexStock: dateIndexStock,
+    indexMarket: dateIndexMarket,
     timeline,
     dateField
-  }))
-  const windowsReturns = dates.map((date, i) => mapObjIndexed(getReturns, windowsPerDate[i]))
-
-  const regressionStandardErrors = windowsReturns.map(getRegressionError)
-
-  const normalReturn = dates.map((date, i) => calcNormalReturn(windowsReturns[i]))
-
-  const abnormalReturn = dates.map((date, i) => calcAbnormalReturn(windowsReturns[i], normalReturn[i]))
-
-  const CARs = dates.map((date, i) => returnsAbnormalCumulative(abnormalReturn[i]))
-
-  const statisticalTests = abnormalReturn.map(calcStatisticTest)
-
-  const significantTests = statisticalTests.map(testSignificant)
-
-  const windowsWithAllData = windowsPerDate.map((v, windowIndex) => {
-    const { stockEventWindow } = v
-    const editedStockEventWindow = stockEventWindow.map((item, priceIndex) => {
-      const RV = windowsReturns[windowIndex]['stockEventWindow'][priceIndex]
-      const NR = normalReturn[windowIndex][priceIndex]
-      const ABR = abnormalReturn[windowIndex][priceIndex]
-      const car = CARs[windowIndex][priceIndex]
-      const ST = statisticalTests[windowIndex][priceIndex]
-      const significantTest = significantTests[windowIndex][priceIndex]
-
-      return Object.assign({}, item, {
-        [RETURN]: RV,
-        [NORMAL_RETURN]: NR,
-        [ABNORMAL_RETURN]: ABR,
-        [CAR]: car,
-        [STATISTICAL_TEST]: ST,
-        [SIGNIFICANT_TEST]: significantTest
-      })
-    })
-    return Object.assign({}, v, {
-      stockEventWindow: editedStockEventWindow
-    })
-  }).reduce((a, b, i) => {
-    a[dates[i]] = b
-    return a
-  }, {})
-
-  const goodBadNeutralNewsCar = groupBy(prop('type'), dates.map((date, dateIndex) => {
-    const { stockEventWindow } = windowsWithAllData[date]
-    const newsDateIndex = findIndex(propEq(dateField, date))(stockEventWindow)
-    const newsDate = stockEventWindow[newsDateIndex]
-
-    const Result = {
-      [dateField]: date,
-      index: newsDateIndex,
-      CAR: CARs[dateIndex]
-    }
-
-    if (newsDate[ABNORMAL_RETURN] > 0.025) return Object.assign({}, Result, { type: 1 }) // good news
-    else if (newsDate[ABNORMAL_RETURN] < -0.025) return Object.assign({}, Result, { type: -1 }) // bad news
-    else return Object.assign({}, Result, { type: 0 }) // neutral news
-  }))
-
-  const calcCarAverage = arrOfDays => zipMany(arrOfDays.map(prop('CAR'))).map(ar => mean(ar))
-
-  const goodBadNeutralNewsCarAverage = mapObjIndexed(calcCarAverage, goodBadNeutralNewsCar)
-
-  // calculate CAR
-  const getResultPerDates = (o, index) => ({
-    Date: dates[index],
-    RegressionError: regressionStandardErrors[index],
-    eventWindowsNormalReturn: normalReturn[index],
-    eventWindowsAbnormalReturn: abnormalReturn[index],
-    eventWindowStatisticalTest: statisticalTests[index],
-    eventWindowSignificantTest: significantTests[index],
-    eventWindowCAR: CARs[index],
-    eventWindowsDates: windowsPerDate[index].marketEventWindow.map(dateProp),
-    stockEventWindow: o.stockEventWindow,
-    marketEventWindow: o.marketEventWindow
   })
 
-  const resultPerDates = indexByDate(dateField)(windowsReturns.map(getResultPerDates))
+  const timelineWindowsReturns = mapObjIndexed(mapByReturnField, timelineWindows)
+  const { stockEstimationWindow, marketEstimationWindow, stockEventWindow, marketEventWindow } = timelineWindowsReturns
+
+  // get regression error
+  const regressionError = regressionStandardError(stockEstimationWindow, marketEstimationWindow)
+
+  // get normal returns
+  const normalReturn = normalReturns(marketEstimationWindow, stockEstimationWindow, marketEventWindow)
+
+  // get abnormal return
+  const abnormalReturn = returnsAbnormal(stockEventWindow, normalReturn)
+
+  // get CARS
+  const CARS = returnsAbnormalCumulative(abnormalReturn)
+
+  // get statistical test
+  const statisticalTest = testStatistic(abnormalReturn, regressionError)
+
+  // get significant test
+  const significantTest = testSignificant(statisticalTest)
 
   return {
-    dates,
-    resultPerDates,
-    windowsWithAllData,
-    goodBadNeutralNewsCarAverage
+    normalReturn,
+    abnormalReturn,
+    statisticalTest,
+    significantTest,
+    CARS
   }
+  //   if (newsDate[ABNORMAL_RETURN] > 0.025) return Object.assign({}, Result, { type: 1 }) // good news
+  //   else if (newsDate[ABNORMAL_RETURN] < -0.025) return Object.assign({}, Result, { type: -1 }) // bad news
+  //   else return Object.assign({}, Result, { type: 0 }) // neutral news
 }
