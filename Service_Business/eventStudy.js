@@ -161,7 +161,7 @@ export const extractDateWindows = ({ indexStock, indexMarket, stockData, marketD
  * main part of our program to gather all services together
  * @param dateField {string}
  * @param operationField {string}
- * @param dataCalendar {array}
+ * @param date {string}
  * @param dataStock {array}
  * @param dataMarket {array}
  * @param timeline {object}
@@ -169,11 +169,11 @@ export const extractDateWindows = ({ indexStock, indexMarket, stockData, marketD
  * @todo add good news and bad news category
  * @todo calculate cumulative abnormal return
  */
-export const marketModel = ({ dataCalendar, dataStock, dataMarket, timeline, dateField, operationField }) => {
+export const marketModel = ({ date, dataStock, dataMarket, timeline, dateField, operationField }) => {
   // helpers
   const getReturnField = prop(RETURN_PROP)
   const mapByReturnField = map(getReturnField)
-  const findDateIndex = findIndex(propEq(dateField, dataCalendar))
+  const findDateIndex = findIndex(propEq(dateField, date))
 
   // add return prop to stock and market data
   const dataStockWithReturns = addReturns(dataStock, operationField)
@@ -184,7 +184,7 @@ export const marketModel = ({ dataCalendar, dataStock, dataMarket, timeline, dat
   const dateIndexMarket = findDateIndex(dataMarketWithReturns)
 
   const timelineWindows = extractDateWindows({
-    date: dataCalendar,
+    date,
     stockData: dataStockWithReturns,
     marketData: dataMarketWithReturns,
     indexStock: dateIndexStock,

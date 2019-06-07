@@ -79,7 +79,7 @@ it('should api check for market model request', function () {
   expect(ValidateMarketModel(invalid3).length === 0).toBe(false)
 
   const valid = {
-    dataCalendar: '111',
+    dataCalendar: [{ Date: '111' }],
     dataMarket: [{ Date: '111', Close: 1234 }],
     dataStock: [{ Date: '111', Close: 4321 }],
     timeline: {

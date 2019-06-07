@@ -104,7 +104,7 @@ it('should test date extraction', function () {
 it('Should compute Market model', function () {
   const fakeStockDataGen = n => ({ Date: n, Close: 2 ** n })
   const state = {
-    dataCalendar: 6,
+    date: 6,
     dataMarket: [
       fakeStockDataGen(1),
       fakeStockDataGen(2),

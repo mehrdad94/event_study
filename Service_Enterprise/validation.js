@@ -50,8 +50,11 @@ const isValidDataStock = ({ dataStock, operationField, dateField }) => {
     dataStock.length > 0 &&
     dataStock.every(item => is(Number, item[operationField]) && is(String, item[dateField]))
 }
-const isValidDataCalendar = ({ dataCalendar }) => {
-  return (!isNil(dataCalendar) && is(String, dataCalendar))
+const isValidDataCalendar = ({ dataCalendar, dateField }) => {
+  return (!isNil(dataCalendar) &&
+    is(Array, dataCalendar)) &&
+    dataCalendar.length > 0 &&
+    dataCalendar.every(item => is(String, item[dateField]))
 }
 const isValidTimeline = ({ timeline }) => {
   return (!isNil(timeline) &&
