@@ -11,6 +11,8 @@ import {
   returnsDaily,
   marketModel
 } from './eventStudy'
+import findIndex from 'ramda/src/findIndex'
+import propEq from 'ramda/src/propEq'
 
 it('should test standard error', function () {
   const y = [2, 3, 9, 1, 8, 7, 5]
@@ -81,11 +83,16 @@ it('should test date extraction', function () {
     T2T3: 1
   }
 
+  const findDateIndex = findIndex(propEq('Date', lookupDate))
+  const dateIndex = findDateIndex(stockAndMarketData)
+
   const result = extractDateWindows({
     date: lookupDate,
     stockData: stockAndMarketData,
     marketData: stockAndMarketData,
     timeline,
+    indexStock: dateIndex,
+    indexMarket: dateIndex,
     dateField: 'Date'
   })
 
@@ -138,5 +145,4 @@ it('Should compute Market model', function () {
   expect(result.abnormalReturn.toString()).toBe('0,0,0,0')
   expect(result.statisticalTest.toString()).toBe('NaN,NaN,NaN,NaN')
   expect(result.significantTest.toString()).toBe('false,false,false,false')
-  // @todo calculate cumulative abnormal return
 })

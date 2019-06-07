@@ -166,7 +166,8 @@ export const extractDateWindows = ({ indexStock, indexMarket, stockData, marketD
  * @param dataMarket {array}
  * @param timeline {object}
  * @return {object}
- * @todo refactor this function to simpler form
+ * @todo add good news and bad news category
+ * @todo calculate cumulative abnormal return
  */
 export const marketModel = ({ dataCalendar, dataStock, dataMarket, timeline, dateField, operationField }) => {
   // helpers

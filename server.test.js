@@ -7,7 +7,7 @@ const fakeStockDataGenerator = n => ({ Date: `${n}`, Close: 2 ** n })
 const seqGenerator = n => n !== 1 ? [...seqGenerator(n - 1), n] : [n]
 
 // data
-const dataCalendar = [{ Date: '6' }]
+const dataCalendar = '6'
 const dataMarket = seqGenerator(11).map(fakeStockDataGenerator)
 const dataStock = seqGenerator(22).map(fakeStockDataGenerator)
 const timeline = {
