@@ -1,4 +1,4 @@
-/* global it */
+/* global it expect */
 import { app } from './server'
 const request = require('supertest')
 // @todo add more test to validate event study module

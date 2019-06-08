@@ -166,7 +166,7 @@ export const extractDateWindows = ({ indexStock, indexMarket, stockData, marketD
  * @param dataMarket {array}
  * @param timeline {object}
  * @return {object}
- * @todo add good news and bad news category
+ * @todo test good news and bad news category to see that is the real index of news date
  * @todo calculate cumulative abnormal return
  */
 export const marketModel = ({ date, dataStock, dataMarket, timeline, dateField, operationField }) => {
@@ -174,7 +174,7 @@ export const marketModel = ({ date, dataStock, dataMarket, timeline, dateField, 
   const getReturnField = prop(RETURN_PROP)
   const mapByReturnField = map(getReturnField)
   const findDateIndex = findIndex(propEq(dateField, date))
-
+  const getTypeOfNews = abnormal => abnormal > 0.025 ? 1 : (abnormalReturn < -0.025 ? -1 : 0)
   // add return prop to stock and market data
   const dataStockWithReturns = addReturns(dataStock, operationField)
   const dataMarketWithReturns = addReturns(dataMarket, operationField)
@@ -205,6 +205,9 @@ export const marketModel = ({ date, dataStock, dataMarket, timeline, dateField, 
   // get abnormal return
   const abnormalReturn = returnsAbnormal(stockEventWindow, normalReturn)
 
+  // see what kind of news was that
+  const newsType = getTypeOfNews(abnormalReturn[timeline.T1E - 1])
+
   // get CARS
   const CARS = returnsAbnormalCumulative(abnormalReturn)
 
@@ -219,9 +222,7 @@ export const marketModel = ({ date, dataStock, dataMarket, timeline, dateField, 
     abnormalReturn,
     statisticalTest,
     significantTest,
-    CARS
+    CARS,
+    newsType
   }
-  //   if (newsDate[ABNORMAL_RETURN] > 0.025) return Object.assign({}, Result, { type: 1 }) // good news
-  //   else if (newsDate[ABNORMAL_RETURN] < -0.025) return Object.assign({}, Result, { type: -1 }) // bad news
-  //   else return Object.assign({}, Result, { type: 0 }) // neutral news
 }

@@ -145,4 +145,5 @@ it('Should compute Market model', function () {
   expect(result.abnormalReturn.toString()).toBe('0,0,0,0')
   expect(result.statisticalTest.toString()).toBe('NaN,NaN,NaN,NaN')
   expect(result.significantTest.toString()).toBe('false,false,false,false')
+  expect(result.newsType).toBe(0)
 })
