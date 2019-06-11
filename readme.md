@@ -1,4 +1,4 @@
-## Event Study with Javascript
+## JavaScript Event Study package
 This project was created based on Event Study methodologies by [mackinlay paper](https://pdfs.semanticscholar.org/aac6/83a678a12a3dcd73389aac7289868847ea73.pdf).
 
 ## Tech / framework used
