@@ -37,8 +37,8 @@ marketModel(same body as api body)
 ```
 
 
-##Installation
+## Installation
 run `yarn install` or `npm install` then `yarn serve`.
 
-##Tests
+## Tests
 run `yarn test`
