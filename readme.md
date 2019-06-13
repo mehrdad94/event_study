@@ -16,7 +16,7 @@ You can use this project as an api package or extract services and use it for yo
 
 If you intend to use api, just run the project and query like this:
 ```
-axios.post('http://localhost:8080', {
+axios.post('http://localhost:8080/market/model', {
     dataCalendar: [{ Date: '6' }],  // sequence of event dates 
     dataMarket: [{ Date: '1', Close: '100' }], // sequence of market price
     dataStock: [{ Date: '2', Close: '200' }], // sequence of stock price
