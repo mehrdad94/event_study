@@ -58,12 +58,12 @@ export const returnsDaily = prices => {
 /**
  * Add return prop to a list of prices
  * @param {array} data
- * @param {string} operationField
+ * @param {string} operationColumn
  * @returns {array}
  */
-export const addReturns = (data, operationField) => {
-  const getOperationField = prop(operationField)
-  const returns = returnsDaily(data.map(getOperationField))
+export const addReturns = (data, operationColumn) => {
+  const getOperationColumn = prop(operationColumn)
+  const returns = returnsDaily(data.map(getOperationColumn))
   return returns.map((item, index) => ({
     ...data[index + 1],
     [RETURN_PROP]: item
@@ -159,41 +159,40 @@ export const extractDateWindows = ({ indexStock, indexMarket, stockData, marketD
 
 /**
  * main part of our program to gather all services together
- * @param dateField {string}
- * @param operationField {string}
+ * @param dateColumn {string}
+ * @param operationColumn {string}
  * @param date {string}
- * @param dataStock {array}
- * @param dataMarket {array}
+ * @param stock {array}
+ * @param market {array}
  * @param timeline {object}
  * @return {object}
  * @todo test good news and bad news category to see that is the real index of news date
  * @todo calculate cumulative abnormal return
  */
-export const marketModel = ({ date, dataStock, dataMarket, timeline, dateField, operationField }) => {
+export const marketModel = ({ date, stock, market, timeline, dateColumn, operationColumn }) => {
   // helpers
-  const getReturnField = prop(RETURN_PROP)
-  const mapByReturnField = map(getReturnField)
-  const findDateIndex = findIndex(propEq(dateField, date))
+  const getReturnColumn = prop(RETURN_PROP)
+  const mapByReturnColumn = map(getReturnColumn)
+  const findDateIndex = findIndex(propEq(dateColumn, date))
   const getTypeOfNews = abnormal => abnormal > 0.025 ? 1 : (abnormalReturn < -0.025 ? -1 : 0)
   // add return prop to stock and market data
-  const dataStockWithReturns = addReturns(dataStock, operationField)
-  const dataMarketWithReturns = addReturns(dataMarket, operationField)
+  const stockWithReturns = addReturns(stock, operationColumn)
+  const marketWithReturns = addReturns(market, operationColumn)
 
   // extract timeline window from stock and market data
-  const dateIndexStock = findDateIndex(dataStockWithReturns)
-  const dateIndexMarket = findDateIndex(dataMarketWithReturns)
+  const dateIndexStock = findDateIndex(stockWithReturns)
+  const dateIndexMarket = findDateIndex(marketWithReturns)
 
   const timelineWindows = extractDateWindows({
     date,
-    stockData: dataStockWithReturns,
-    marketData: dataMarketWithReturns,
+    stockData: stockWithReturns,
+    marketData: marketWithReturns,
     indexStock: dateIndexStock,
     indexMarket: dateIndexMarket,
-    timeline,
-    dateField
+    timeline
   })
 
-  const timelineWindowsReturns = mapObjIndexed(mapByReturnField, timelineWindows)
+  const timelineWindowsReturns = mapObjIndexed(mapByReturnColumn, timelineWindows)
   const { stockEstimationWindow, marketEstimationWindow, stockEventWindow, marketEventWindow } = timelineWindowsReturns
 
   // get regression error
