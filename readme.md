@@ -1,5 +1,8 @@
-## JavaScript Event Study package
-This project was created based on Event Study methodologies by [mackinlay paper](https://pdfs.semanticscholar.org/aac6/83a678a12a3dcd73389aac7289868847ea73.pdf).
+## Event Study
+A NPM package for conducting event studies.
+
+## Installation
+Run `npm install eventStudy --save`.
 
 ## Features
 * Market Model
@@ -7,35 +10,91 @@ This project was created based on Event Study methodologies by [mackinlay paper]
     * abnormalReturn
     * statisticalTest
     * significantTest
+    * CARS
+    * newsType (Good, Bad, neutral)
+## Terminology
+##### calendar: object of event dates.
+##### stock: stock prices.
+##### market: market prices.
+##### timeline: event study time line that includes: pre event window (T0T1), end of pre event window till event date (T1E), event date till post event window (ET2), post event window (T2T3).
+##### dateColumn: which field in stock or market prices has date format. 
+##### operationColumn: which field in stock or market price you want to perform arithmetic operations (default is Close). 
 
-## Code Example
+## How to use
+#### Market Model
+##### Option one: provide information for each date separately. 
 ```
 import { marketModel } from 'eventStudy'
-marketModel({
-    dataCalendar: [{ Date: '6' }],  // Event list
-    dataMarket: [{ Date: '1', Close: '100' }], // Market price sheet
-    dataStock: [{ Date: '2', Close: '200' }], // Stock price sheet
-    timeline: { // event study time line (E is event date)
-      T0T1: 2, // pre event window
-      T1E: 2, // event window (till event date)
-      ET2: 2, // event window (till post event window)
-      T2T3: 2 // post event window
-    },
-    operationField: 'Close', // which price field should be use (in price table)
-    dateField: 'Date' // which field should be use as date field (in price table)
-})
 
-// result will be
-{
-    normalReturn: [],
-    abnormalReturn: [],
-    statisticalTest: [],
-    significantTest: []
+const data = {
+    calendar: {
+        '2016-12-01': {
+            stock: [{ Date: '2016-12-01', Close: 200 }],
+            market: [{ Date: '2016-12-01', Close: 10 }],
+            timeline: {
+                T0T1: 2,
+                T1E: 2,
+                ET2: 2,
+                T2T3: 2
+            },
+            dateColumn: 'Date',
+            operationColumn: 'Close'
+        }
+    }
 }
+
+marketModel(data)
+```
+##### Option two: provide information globally.
+In this method, every date will use same global information.
+```
+import { marketModel } from 'eventStudy'
+
+const data = {
+    calendar: {
+        '2016-12-01': {}
+    },
+    stock: [{ Date: '2016-12-01', Close: 200 }],
+    market: [{ Date: '2016-12-01', Close: 10 }],
+    timeline: {
+        T0T1: 2,
+        T1E: 2,
+        ET2: 2,
+        T2T3: 2
+    },
+    dateColumn: 'Date',
+    operationColumn: 'Close'
+}
+
+marketModel(data)
+```
+##### Option three: combine information.
+In this method for date '2016-12-01' the global information(stock) will be ignored.
+
+```
+import { marketModel } from 'eventStudy'
+
+const data = {
+    calendar: {
+        '2016-12-01': {
+            stock: [{ Date: '2016-12-01', Close: 30 }],
+        }
+    },
+    stock: [{ Date: '2016-12-01', Close: 200 }],
+    market: [{ Date: '2016-12-01', Close: 10 }],
+    timeline: {
+        T0T1: 2,
+        T1E: 2,
+        ET2: 2,
+        T2T3: 2
+    },
+    dateColumn: 'Date',
+    operationColumn: 'Close'
+}
+
+marketModel(data)
 ```
 
-## Installation
-run `yarn install` or `npm install` then `yarn serve`.
 
 ## Tests
 run `yarn test`

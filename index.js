@@ -1,4 +1,3 @@
-// import { ValidateMarketModel } from './services/validation'
 import { marketModel, extractMarketModelRequiredInfo } from './services/eventStudy'
 import { hasValidMMStructure } from './services/validation'
 

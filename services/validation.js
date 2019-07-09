@@ -36,7 +36,7 @@ export const hasValidPrices = (prices, operationColumn, dateColumn) => {
  * @param {object} dataCalendar
  * @returns {boolean}
  */
-export const hasValidCalendar = (dataCalendar) => {
+export const hasValidCalendar = dataCalendar => {
   return (!isNil(dataCalendar) &&
     is(Object, dataCalendar)) &&
     Object.keys(dataCalendar).length > 0 &&
@@ -64,7 +64,7 @@ export const hasEnoughPrices = (prices, date, timeline, dateProp = defaultDateCo
  @param {object} MMInfo - data to validate
  @return {string|boolean} - Invalid prop
  */
-export const hasValidMMStructure = (MMInfo) => {
+export const hasValidMMStructure = MMInfo => {
   MMInfo.forEach(({ date, stock, market, timeline, dateColumn, operationColumn }, index) => {
     const errorTrace = ` ERROR: in ${index} index, with date: ${date}`
     if (isNil(date)) return `Date can not be empty. ${errorTrace}`
