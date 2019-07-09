@@ -1,6 +1,6 @@
 {
   "name": "event-study",
-  "version": "1.1.0",
+  "version": "1.0.1",
   "description": "event study npm package",
   "main": "./build/main.bundle.js",
   "scripts": {
@@ -28,5 +28,11 @@
   "dependencies": {
     "ramda": "^0.26.1",
     "regression": "^2.0.1"
-  }
+  },
+  "keywords": [
+    "eventStudy",
+    "event-study",
+    "event",
+    "study"
+  ]
 }
