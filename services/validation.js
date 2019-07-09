@@ -1,4 +1,3 @@
-import partition from 'ramda/src/partition'
 import findIndex from 'ramda/src/findIndex'
 import propEq from 'ramda/src/propEq'
 import is from 'ramda/src/is'
@@ -46,35 +45,35 @@ export const hasValidCalendar = (dataCalendar) => {
 /**
   Check every date in calendar has enough data (from timeline)
   @param {array<object>} prices
-  @param {array<string>} dates
+  @param {string} date
   @param {object} timeline
   @param {string} [dateProp]
   @return {boolean, array<object>} - array of invalids
 */
-export const hasEnoughPrices = (prices, dates, timeline, dateProp = defaultDateColumn) => {
-  const hasEnoughItems = (prices, date) => {
-    const index = findIndex(propEq(dateProp, date))(prices)
-    const pricesLength = prices.length
-    if (index === -1) return false
-    else if (timeline['T0T1'] + timeline['T1E'] - 1 > index) return false
-    else return pricesLength - 1 - index >= timeline['ET2'] + timeline['T2T3']
-  }
-  const [, invalids] = partition(date => hasEnoughItems(prices, date), dates)
-  return invalids
+export const hasEnoughPrices = (prices, date, timeline, dateProp = defaultDateColumn) => {
+  const index = findIndex(propEq(dateProp, date))(prices)
+  const pricesLength = prices.length
+
+  if (index === -1) return false
+  else if (timeline['T0T1'] + timeline['T1E'] - 1 > index) return false
+  else return pricesLength - 1 - index >= timeline['ET2'] + timeline['T2T3']
 }
 
-// /**
-//  @param {object} data - data to validate
-//  @return {object} - validated object
-//  @todo refactor validation to accept a schema then do the rest of it
-//  */
-// export const hasValidMMStructure = (data) => {
-//   if (isNil(data)) return 'You should provide value'
-//   else if (isNil(data.operationColumn)) return 'Operation filed should not be empty'
-//   else if (isNil(data.dateColumn)) return 'Date field should not be empty'
-//   else if (!isValidDataCalendar(data)) return 'Invalid Data Calendar'
-//   else if (!isValidTimeline(data)) return 'Invalid Timeline'
-//   else if (!isValidDataMarket(data)) return 'Invalid Market Data'
-//   else if (!isValidDataStock(data)) return 'Invalid Data Stock'
-//   else return ''
-// }
+/**
+ Validate request data to have proper structure
+ @param {object} MMInfo - data to validate
+ @return {string|boolean} - Invalid prop
+ */
+export const hasValidMMStructure = (MMInfo) => {
+  MMInfo.forEach(({ date, stock, market, timeline, dateColumn, operationColumn }, index) => {
+    const errorTrace = ` ERROR: in ${index} index, with date: ${date}`
+    if (isNil(date)) return `Date can not be empty. ${errorTrace}`
+    else if (!hasValidTimeline) return `Invalid Timeline. ${errorTrace}`
+    else if (!hasEnoughPrices(stock, date, timeline)) return `Invalid Stock Data. ${errorTrace}`
+    else if (!hasEnoughPrices(market, date, timeline)) return `Invalid Market Data. ${errorTrace}`
+    else if (isNil(dateColumn)) return `Date Column can not be empty. ${errorTrace}`
+    else if (isNil(operationColumn)) return `Operation Column should not be empty. ${errorTrace}`
+  })
+
+  return true
+}

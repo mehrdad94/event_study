@@ -3,8 +3,13 @@ import {
   hasValidTimeline,
   hasValidPrices,
   hasValidCalendar,
-  hasEnoughPrices
+  hasEnoughPrices,
+  hasValidMMStructure
 } from './validation'
+
+import {
+  extractMarketModelRequiredInfo
+} from './eventStudy'
 
 describe('Should test validations', function () {
   it('should validate timeline', function () {
@@ -79,62 +84,49 @@ describe('Should test validations', function () {
       { Date: '2016-12-11' },
       { Date: '2016-12-12' }
     ]
-    const dates = [
-      '2016-12-02',
-      '2016-12-06',
-      '2016-12-10'
+
+    expect(hasEnoughPrices(prices, '2016-12-02', timeline)).toBe(true)
+
+    expect(hasEnoughPrices(prices, '2016-12-01', timeline)).toBe(false)
+
+    expect(hasEnoughPrices(prices, '2016-12-11', timeline)).toBe(false)
+  })
+
+  it('should validate market model request', function () {
+    const timeline = {
+      T0T1: 1,
+      T1E: 1,
+      ET2: 1,
+      T2T3: 1
+    }
+
+    const prices = [
+      { Date: '2016-12-01', Close: 1234 },
+      { Date: '2016-12-02', Close: 1234 },
+      { Date: '2016-12-03', Close: 1234 },
+      { Date: '2016-12-04', Close: 1234 },
+      { Date: '2016-12-05', Close: 1234 },
+      { Date: '2016-12-06', Close: 1234 },
+      { Date: '2016-12-07', Close: 1234 },
+      { Date: '2016-12-08', Close: 1234 },
+      { Date: '2016-12-09', Close: 1234 },
+      { Date: '2016-12-10', Close: 1234 },
+      { Date: '2016-12-11', Close: 1234 },
+      { Date: '2016-12-12', Close: 1234 }
     ]
 
-    expect(hasEnoughPrices(prices, dates, timeline).length).toBe(0)
+    const data = {
+      calendar: {
+        '2016-12-06': {
+          market: prices,
+          stock: prices,
+          timeline
+        }
+      }
+    }
 
-    dates.push('2016-12-01')
+    const validMMStructure = extractMarketModelRequiredInfo(data)
 
-    expect(hasEnoughPrices(prices, dates, timeline)[0]).toBe('2016-12-01')
-
-    dates.push('2016-12-11')
-    expect(hasEnoughPrices(prices, dates, timeline)[1]).toBe('2016-12-11')
+    expect(hasValidMMStructure(validMMStructure)).toBe(true)
   })
-//
-//   it('should api check for market model request', function () {
-//     const invalid = {
-//       dataCalendar: {},
-//       dataMarket: ''
-//     }
-//
-//     expect(ValidateMarketModel(invalid).length === 0).toBe(false)
-//     const invalid2 = {
-//       dataCalendar: [],
-//       dataMarket: [],
-//       dataStock: [],
-//       timeline: {}
-//     }
-//     expect(ValidateMarketModel(invalid2).length === 0).toBe(false)
-//
-//     const invalid3 = {
-//       dataCalendar: [{ Date: '' }],
-//       dataMarket: [{ Close: '' }],
-//       dataStock: [{ Close: '' }],
-//       timeline: {
-//         T0T1: 1,
-//         T1E: 1,
-//         T2T3: 1
-//       }
-//     }
-//     expect(ValidateMarketModel(invalid3).length === 0).toBe(false)
-//
-//     const valid = {
-//       dataCalendar: [{ Date: '111' }],
-//       dataMarket: [{ Date: '111', Close: 1234 }],
-//       dataStock: [{ Date: '111', Close: 4321 }],
-//       timeline: {
-//         T0T1: 1,
-//         T1E: 1,
-//         ET2: 1,
-//         T2T3: 1
-//       },
-//       operationColumn: 'Close',
-//       dateColumn: 'Date'
-//     }
-//     expect(ValidateMarketModel(valid).length === 0).toBe(true)
-// })
 })

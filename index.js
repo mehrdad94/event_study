@@ -1,32 +1,15 @@
 // import { ValidateMarketModel } from './services/validation'
-import { marketModel } from './services/eventStudy'
-import { defaultTimeLine, defaultOperationColumn, defaultDateColumn } from './config/defaults'
-
-const extractMarketModelRequiredInfo = ({
-  calendar,
-  stock,
-  market,
-  timeline = defaultTimeLine,
-  dateColumn = defaultDateColumn,
-  operationColumn = defaultOperationColumn }) => {
-  return Object.entries(calendar).map(([date, option]) => {
-    return {
-      date,
-      stock: option.stock || stock,
-      market: option.market || market,
-      timeline: option.timeline || timeline,
-      dateColumn: option.dateColumn || dateColumn,
-      operationColumn: option.operationColumn || operationColumn
-    }
-  })
-}
+import { marketModel, extractMarketModelRequiredInfo } from './services/eventStudy'
+import { hasValidMMStructure } from './services/validation'
 
 /**
  * Process each date with market model
- * @param {object} data
+ * @param {object} data - request object
+ * @return {object|string} - result object or validation result
  */
 export const MarketModel = (data) => {
-  const extractedInfo = extractMarketModelRequiredInfo(data)
-
-  return extractedInfo.map(marketModel)
+  const MMStructure = extractMarketModelRequiredInfo(data)
+  const validationResult = hasValidMMStructure(MMStructure)
+  if (validationResult) return MMStructure.map(marketModel)
+  else return validationResult
 }

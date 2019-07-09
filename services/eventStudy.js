@@ -11,6 +11,7 @@ import slice from 'ramda/src/slice'
 import prop from 'ramda/src/prop'
 import map from 'ramda/src/map'
 import mapObjIndexed from 'ramda/src/mapObjIndexed'
+import { defaultDateColumn, defaultOperationColumn, defaultTimeLine } from '../config/defaults'
 
 const RETURN_PROP = 'Return'
 /**
@@ -224,4 +225,34 @@ export const marketModel = ({ date, stock, market, timeline, dateColumn, operati
     CARS,
     newsType
   }
+}
+
+/**
+ * Extract required information for market model analysis
+ * @param {object} calendar
+ * @param {array<object>} [stock]
+ * @param {array<object>} [market]
+ * @param {object} [timeline]
+ * @param {string} [dateColumn]
+ * @param {string} [operationColumn]
+ * @returns {array<object>}
+ */
+export const extractMarketModelRequiredInfo = ({
+  calendar,
+  stock,
+  market,
+  timeline = defaultTimeLine,
+  dateColumn = defaultDateColumn,
+  operationColumn = defaultOperationColumn }
+) => {
+  return Object.entries(calendar).map(([date, option = {}]) => {
+    return {
+      date,
+      stock: option.stock || stock,
+      market: option.market || market,
+      timeline: option.timeline || timeline,
+      dateColumn: option.dateColumn || dateColumn,
+      operationColumn: option.operationColumn || operationColumn
+    }
+  })
 }
