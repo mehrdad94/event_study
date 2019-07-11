@@ -1,6 +1,6 @@
 {
   "name": "event-study",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "event study npm package",
   "main": "./build/main.bundle.js",
   "scripts": {
