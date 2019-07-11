@@ -2,7 +2,7 @@
 A NPM package for conducting event studies.
 
 ## Installation
-Run `npm install eventStudy --save`.
+Run `npm install event-study --save`.
 
 ## Features
 * Market Model
