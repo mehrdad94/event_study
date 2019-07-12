@@ -30,6 +30,7 @@
     "regression": "^2.0.1"
   },
   "keywords": [
+    "event study",
     "eventStudy",
     "event-study",
     "event",
