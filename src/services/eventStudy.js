@@ -110,6 +110,17 @@ export const testStatistic = (AR, regressionError) => AR.map(item => divide(item
 export const testSignificant = TS => TS.map(item => Math.abs(item) > 1.96)
 
 /**
+ * Calculate news Type
+ * @param AR - abnormal return
+ * @returns {number}
+ */
+export const getNewsType = AR => {
+  if (AR > 0.025) return 1
+  else if (AR < -0.025) return -1
+  else return 0
+}
+
+/**
  * Calculate cumulative abnormal return by sum with previous value
  * @param {array} AR - abnormal returns
  * @return {array}
@@ -175,7 +186,6 @@ export const marketModel = ({ date, stock, market, timeline, dateColumn, operati
   const getReturnColumn = prop(RETURN_PROP)
   const mapByReturnColumn = map(getReturnColumn)
   const findDateIndex = findIndex(propEq(dateColumn, date))
-  const getTypeOfNews = abnormal => abnormal > 0.025 ? 1 : (abnormalReturn < -0.025 ? -1 : 0)
   // add return prop to stock and market data
   const stockWithReturns = addReturns(stock, operationColumn)
   const marketWithReturns = addReturns(market, operationColumn)
@@ -206,7 +216,7 @@ export const marketModel = ({ date, stock, market, timeline, dateColumn, operati
   const abnormalReturn = returnsAbnormal(stockEventWindow, normalReturn)
 
   // see what kind of news was that
-  const newsType = getTypeOfNews(abnormalReturn[timeline.T1E - 1])
+  const newsType = getNewsType(abnormalReturn[timeline.T1E - 1])
 
   // get CARS
   const CARS = returnsAbnormalCumulative(abnormalReturn)
@@ -218,6 +228,7 @@ export const marketModel = ({ date, stock, market, timeline, dateColumn, operati
   const significantTest = testSignificant(statisticalTest)
 
   return {
+    date,
     normalReturn,
     abnormalReturn,
     statisticalTest,

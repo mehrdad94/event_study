@@ -95,6 +95,28 @@ const data = {
 marketModel(data)
 ```
 
+## Analyse results
+Results will be in below format:
+
+**Result contains information just for EVENT PERIOD (T1E + ET2), for example in above scenario the abnormal return will be
+an array with 4 item because T1E is 2 and ET2 is 2.**
+```
+[{
+    date, // event date
+    normalReturn,
+    abnormalReturn,
+    statisticalTest, 
+    significantTest,
+    CARS,
+    newsType // 1 means good news, -1 bad news, 0 neutral
+}]
+```
+
+## Contributing
+If you saw any issue or have any recommendation you have 2 option to follow and I will be grateful:
+
+##### Option one: Fill an issue in github account.
+##### Option two: Send an Email to: m_javidi@outlook.com
 
 ## Tests
 run `yarn test`

@@ -9,6 +9,7 @@ import {
   returnsAbnormalCumulative,
   extractDateWindows,
   returnsDaily,
+  getNewsType,
   marketModel
 } from './eventStudy'
 import findIndex from 'ramda/src/findIndex'
@@ -48,6 +49,20 @@ describe('event study main service', function () {
     const testStatistics = [1, 2, 1]
 
     expect(testSignificant(testStatistics).toString()).toBe('false,true,false')
+  })
+
+  it('should test news type from abnormal return', function () {
+    let AR = 1
+
+    expect(getNewsType(AR)).toBe(1)
+
+    AR = -1
+
+    expect(getNewsType(AR)).toBe(-1)
+
+    AR = 0
+
+    expect(getNewsType(AR)).toBe(0)
   })
 
   it('should cumulative returns', function () {
