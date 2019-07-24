@@ -1,5 +1,5 @@
 /* global it expect */
-import { MarketModel } from './index'
+import { MarketModel } from '../build/main.bundle'
 // @todo add more test to validate event study module
 const operationColumn = 'Close'
 const dateColumn = 'Date'
@@ -22,9 +22,14 @@ it('Should test market model service with valid request', function () {
 
   const date = '6'
 
-  const calendar = {
-    [date]: { timeline, market, stock, operationColumn, dateColumn }
-  }
+  const calendar = [{
+    date,
+    timeline,
+    market,
+    stock,
+    operationColumn,
+    dateColumn
+  }]
 
   const validBody = {
     calendar
@@ -89,9 +94,7 @@ it('Should test news type', function () {
   let date = '12'
 
   const negativeNewsType = {
-    calendar: {
-      [date]: { timeline, market, stock, operationColumn, dateColumn }
-    }
+    calendar: [{ date, timeline, market, stock, operationColumn, dateColumn }]
   }
 
   let result = MarketModel(negativeNewsType)
@@ -100,9 +103,7 @@ it('Should test news type', function () {
   date = '13'
 
   const positiveNewsType = {
-    calendar: {
-      [date]: { timeline, market, stock, operationColumn, dateColumn }
-    }
+    calendar: [{ date, timeline, market, stock, operationColumn, dateColumn }]
   }
 
   result = MarketModel(positiveNewsType)

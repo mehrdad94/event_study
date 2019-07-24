@@ -240,7 +240,7 @@ export const marketModel = ({ date, stock, market, timeline, dateColumn, operati
 
 /**
  * Extract required information for market model analysis
- * @param {object} calendar
+ * @param {array} calendar
  * @param {array<object>} [stock]
  * @param {array<object>} [market]
  * @param {object} [timeline]
@@ -256,14 +256,14 @@ export const extractMarketModelRequiredInfo = ({
   dateColumn = defaultDateColumn,
   operationColumn = defaultOperationColumn }
 ) => {
-  return Object.entries(calendar).map(([date, option = {}]) => {
+  return calendar.map((event = {}) => {
     return {
-      date,
-      stock: option.stock || stock,
-      market: option.market || market,
-      timeline: option.timeline || timeline,
-      dateColumn: option.dateColumn || dateColumn,
-      operationColumn: option.operationColumn || operationColumn
+      date: event.date,
+      stock: event.stock || stock,
+      market: event.market || market,
+      timeline: event.timeline || timeline,
+      dateColumn: event.dateColumn || dateColumn,
+      operationColumn: event.operationColumn || operationColumn
     }
   })
 }

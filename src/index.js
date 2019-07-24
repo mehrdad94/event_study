@@ -6,9 +6,11 @@ import { hasValidMMStructure } from './services/validation'
  * @param {object} data - request object
  * @return {object|string} - result object or validation result
  */
-export const MarketModel = (data) => {
+export const MarketModel = data => {
   const MMStructure = extractMarketModelRequiredInfo(data)
+
   const validationResult = hasValidMMStructure(MMStructure)
+
   if (validationResult) return MMStructure.map(marketModel)
   else return validationResult
 }

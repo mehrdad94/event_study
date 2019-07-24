@@ -13,7 +13,7 @@ Run `npm install event-study --save`.
     * CARS
     * newsType (Good, Bad, neutral)
 ## Terminology
-##### calendar: object of event dates.
+##### calendar: array of event dates.
 ##### stock: stock prices.
 ##### market: market prices.
 ##### timeline: event study time line that includes: pre event window (T0T1), end of pre event window till event date (T1E), event date till post event window (ET2), post event window (T2T3).
@@ -27,8 +27,8 @@ Run `npm install event-study --save`.
 import { marketModel } from 'event-study'
 
 const data = {
-    calendar: {
-        '2016-12-01': {
+    calendar: [{
+            date: '2016-12-01',
             stock: [{ Date: '2016-12-01', Close: 200 }],
             market: [{ Date: '2016-12-01', Close: 10 }],
             timeline: {
@@ -39,8 +39,7 @@ const data = {
             },
             dateColumn: 'Date',
             operationColumn: 'Close'
-        }
-    }
+    }]
 }
 
 marketModel(data)
@@ -51,9 +50,9 @@ In this method, every date will use same global information.
 import { marketModel } from 'event-study'
 
 const data = {
-    calendar: {
-        '2016-12-01': {}
-    },
+    calendar: [
+        { date: '2016-12-01' }
+    ],
     stock: [{ Date: '2016-12-01', Close: 200 }],
     market: [{ Date: '2016-12-01', Close: 10 }],
     timeline: {
@@ -75,11 +74,9 @@ In this method for date '2016-12-01' the global information(stock) will be ignor
 import { marketModel } from 'event-study'
 
 const data = {
-    calendar: {
-        '2016-12-01': {
-            stock: [{ Date: '2016-12-01', Close: 30 }],
-        }
-    },
+    calendar: [
+        { date: '2016-12-01', stock: [{ Date: '2016-12-01', Close: 30 }] }
+    ],
     stock: [{ Date: '2016-12-01', Close: 200 }],
     market: [{ Date: '2016-12-01', Close: 10 }],
     timeline: {

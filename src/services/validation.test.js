@@ -9,7 +9,7 @@ import {
 
 import {
   extractMarketModelRequiredInfo
-} from './eventStudy'
+} from './eventStudy.js'
 
 describe('Should test validations', function () {
   it('should validate timeline', function () {
@@ -116,15 +116,13 @@ describe('Should test validations', function () {
     ]
 
     const data = {
-      calendar: {
-        '2016-12-06': {
-          market: prices,
-          stock: prices,
-          timeline
-        }
-      }
+      calendar: [{
+        date: '2016-12-06',
+        market: prices,
+        stock: prices,
+        timeline
+      }]
     }
-
     const validMMStructure = extractMarketModelRequiredInfo(data)
 
     expect(hasValidMMStructure(validMMStructure)).toBe(true)
