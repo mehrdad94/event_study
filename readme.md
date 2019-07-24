@@ -24,7 +24,7 @@ Run `npm install event-study --save`.
 #### Market Model
 ##### Option one: provide information for each date separately. 
 ```
-import { marketModel } from 'eventStudy'
+import { marketModel } from 'event-study'
 
 const data = {
     calendar: {
@@ -48,7 +48,7 @@ marketModel(data)
 ##### Option two: provide information globally.
 In this method, every date will use same global information.
 ```
-import { marketModel } from 'eventStudy'
+import { marketModel } from 'event-study'
 
 const data = {
     calendar: {
@@ -72,7 +72,7 @@ marketModel(data)
 In this method for date '2016-12-01' the global information(stock) will be ignored.
 
 ```
-import { marketModel } from 'eventStudy'
+import { marketModel } from 'event-study'
 
 const data = {
     calendar: {
