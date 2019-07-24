@@ -162,5 +162,6 @@ describe('event study main service', function () {
     expect(result.statisticalTest.toString()).toBe('NaN,NaN,NaN,NaN')
     expect(result.significantTest.toString()).toBe('false,false,false,false')
     expect(result.newsType).toBe(0)
+    expect(result.returnDates.toString()).toBe('4,5,6,7')
   })
 })

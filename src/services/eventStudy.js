@@ -178,8 +178,6 @@ export const extractDateWindows = ({ indexStock, indexMarket, stockData, marketD
  * @param market {array}
  * @param timeline {object}
  * @return {object}
- * @todo test good news and bad news category to see that is the real index of news date
- * @todo calculate cumulative abnormal return
  */
 export const marketModel = ({ date, stock, market, timeline, dateColumn, operationColumn }) => {
   // helpers
@@ -227,6 +225,10 @@ export const marketModel = ({ date, stock, market, timeline, dateColumn, operati
   // get significant test
   const significantTest = testSignificant(statisticalTest)
 
+  // get return dates
+  const returnDateIndexes = [dateIndexStock - timeline.T1E + 1, dateIndexStock + timeline.ET2 + 1]
+  const returnDates = slice(returnDateIndexes[0], returnDateIndexes[1], stock).map(prop(dateColumn))
+
   return {
     date,
     normalReturn,
@@ -234,7 +236,8 @@ export const marketModel = ({ date, stock, market, timeline, dateColumn, operati
     statisticalTest,
     significantTest,
     CARS,
-    newsType
+    newsType,
+    returnDates
   }
 }
 
