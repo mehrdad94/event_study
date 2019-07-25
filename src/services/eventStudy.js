@@ -125,7 +125,7 @@ export const getNewsType = AR => {
  * @param {array} AR - abnormal returns
  * @return {array}
  */
-export const returnsAbnormalCumulative = AR => AR.reduce((a, b, i) => {
+export const CAR = AR => AR.reduce((a, b, i) => {
   a[i] = b + (a[i - 1] || 0)
   return a
 }, [])
@@ -217,7 +217,7 @@ export const marketModel = ({ date, stock, market, timeline, dateColumn, operati
   const newsType = getNewsType(abnormalReturn[timeline.T1E - 1])
 
   // get CARS
-  const CARS = returnsAbnormalCumulative(abnormalReturn)
+  const CARS = CAR(abnormalReturn)
 
   // get statistical test
   const statisticalTest = testStatistic(abnormalReturn, regressionError)
@@ -270,3 +270,10 @@ export const extractMarketModelRequiredInfo = ({
     }
   })
 }
+
+/**
+ * Calculate Average Abnormal Return
+ * @param {array} returns
+ * @returns {array}
+ */
+export const AAR = returns => returns[0].map((price, pIndex) => mean(returns.map(r => r[pIndex])))

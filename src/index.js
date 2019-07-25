@@ -1,6 +1,8 @@
 import { marketModel, extractMarketModelRequiredInfo } from './services/eventStudy'
 import { hasValidMMStructure } from './services/validation'
 
+export { AAR, CAR } from './services/eventStudy'
+
 /**
  * Process each date with market model
  * @param {object} data - request object

@@ -16,7 +16,7 @@ Run `npm install event-study --save`.
 ##### calendar: array of event dates.
 ##### stock: stock prices.
 ##### market: market prices.
-##### timeline: event study time line that includes: pre event window (T0T1), end of pre event window till event date (T1E), event date till post event window (ET2), post event window (T2T3).
+##### timeline: event study time line that includes: Estimation period (T0T1), Pre-announcement window (T1E), Post-announcement window (ET2), Post-event period (T2T3).
 ##### dateColumn: which field in stock or market prices has date format. 
 ##### operationColumn: which field in stock or market price you want to perform arithmetic operations (default is Close). 
 

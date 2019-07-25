@@ -42,6 +42,7 @@ export const hasValidCalendar = dataCalendar => {
     Object.keys(dataCalendar).length > 0 &&
     Object.values(dataCalendar).every(item => is(Object, item))
 }
+
 /**
   Check every date in calendar has enough data (from timeline)
   @param {array<object>} prices

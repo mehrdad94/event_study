@@ -6,11 +6,12 @@ import {
   returnsAbnormal,
   testStatistic,
   testSignificant,
-  returnsAbnormalCumulative,
+  CAR,
   extractDateWindows,
   returnsDaily,
   getNewsType,
-  marketModel
+  marketModel,
+  AAR
 } from './eventStudy'
 import findIndex from 'ramda/src/findIndex'
 import propEq from 'ramda/src/propEq'
@@ -68,7 +69,7 @@ describe('event study main service', function () {
   it('should cumulative returns', function () {
     const abnormalReturns = [1, 1, 1]
 
-    expect(returnsAbnormalCumulative(abnormalReturns).toString()).toBe('1,2,3')
+    expect(CAR(abnormalReturns).toString()).toBe('1,2,3')
   })
 
   it('should calculate daily returns', function () {
@@ -88,6 +89,7 @@ describe('event study main service', function () {
       Return: 0
     })
   })
+
   it('should test date extraction', function () {
     const fakeDateGen = n => ({ Date: n.toString() })
     const lookupDate = '3'
@@ -164,4 +166,16 @@ describe('event study main service', function () {
     expect(result.newsType).toBe(0)
     expect(result.returnDates.toString()).toBe('4,5,6,7')
   })
+})
+
+it('Should calculate average abnormal return', function () {
+  const returns = [
+    [1, 1, 1],
+    [2, 2, 2],
+    [3, 3, 3]
+  ]
+
+  const result = [2, 2, 2]
+
+  expect(AAR(returns)).toEqual(result)
 })
