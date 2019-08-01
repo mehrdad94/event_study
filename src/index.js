@@ -1,5 +1,6 @@
+import validate from './services/validate'
 import { marketModel, extractMarketModelRequiredInfo } from './services/eventStudy'
-import { hasValidMMStructure } from './services/validation'
+import { MMStructureSchema } from './services/validation'
 
 export { AAR, CAR } from './services/eventStudy'
 
@@ -11,8 +12,8 @@ export { AAR, CAR } from './services/eventStudy'
 export const MarketModel = data => {
   const MMStructure = extractMarketModelRequiredInfo(data)
 
-  const validationResult = hasValidMMStructure(MMStructure)
+  const validationResult = validate.single(MMStructure, MMStructureSchema)
 
-  if (validationResult) return MMStructure.map(marketModel)
+  if (!validationResult) return MMStructure.map(marketModel)
   else return validationResult
 }

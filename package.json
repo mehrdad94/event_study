@@ -27,7 +27,8 @@
   },
   "dependencies": {
     "ramda": "^0.26.1",
-    "regression": "^2.0.1"
+    "regression": "^2.0.1",
+    "validate.js": "^0.13.1"
   },
   "keywords": [
     "event study",
