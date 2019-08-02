@@ -1,9 +1,10 @@
+import validate from './validate'
 import findIndex from 'ramda/src/findIndex'
 import propEq from 'ramda/src/propEq'
 
 import { defaultDateColumn } from '../config/defaults'
 
-export const timelineKeySchema = {
+const timelineKeySchema = {
   presence: true,
   numericality: {
     strict: true,
@@ -11,7 +12,9 @@ export const timelineKeySchema = {
   }
 }
 
-export const columnNameSchema = {
+export const validateTimelineKey = value => validate.single(value, timelineKeySchema)
+
+const columnNameSchema = {
   presence: true,
   type: 'string',
   length: {
@@ -19,7 +22,9 @@ export const columnNameSchema = {
   }
 }
 
-export const priceSchema = ({ dateColumn, operationColumn }) => {
+export const validateColumnName = value => validate.single(value, columnNameSchema)
+
+const priceSchema = ({ dateColumn, operationColumn }) => {
   return {
     presence: true,
     type: 'array',
@@ -33,7 +38,9 @@ export const priceSchema = ({ dateColumn, operationColumn }) => {
   }
 }
 
-export const calendarSchema = {
+export const validatePrices = (value, dateColumn, operationColumn) => validate.single(value, priceSchema({ dateColumn, operationColumn }))
+
+const calendarSchema = {
   presence: true,
   type: 'array',
   length: {
@@ -43,6 +50,8 @@ export const calendarSchema = {
     Date: columnNameSchema
   }
 }
+
+export const validateCalendar = value => validate.single(value, calendarSchema)
 
 /**
   Check every date in calendar has enough data (from timeline)
@@ -61,7 +70,7 @@ export const hasEnoughPrices = (prices, date, timeline, dateProp = defaultDateCo
   else return pricesLength - 1 - index >= timeline['ET2'] + timeline['T2T3']
 }
 
-export const MMStructureSchema = {
+const MMStructureSchema = {
   presence: true,
   type: 'array',
   forEach: {
@@ -76,3 +85,5 @@ export const MMStructureSchema = {
     operationColumn: columnNameSchema
   }
 }
+
+export const validateMMStructure = value => validate.single(value, MMStructureSchema)

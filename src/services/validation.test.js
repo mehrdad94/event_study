@@ -1,13 +1,11 @@
 /* global it expect describe */
-import validate from './validate'
-
 import {
-  timelineKeySchema,
-  columnNameSchema,
-  priceSchema,
-  calendarSchema,
-  hasEnoughPrices,
-  MMStructureSchema
+  validateTimelineKey,
+  validateColumnName,
+  validatePrices,
+  validateCalendar,
+  validateMMStructure,
+  hasEnoughPrices
 } from './validation'
 
 import {
@@ -18,29 +16,29 @@ describe('Should test validations', function () {
   it('should validate timeline', function () {
     const invalidTimelineKey = null
 
-    expect(validate.single(invalidTimelineKey, timelineKeySchema)).toBeTruthy()
+    expect(validateTimelineKey(invalidTimelineKey)).toBeTruthy()
 
     const invalidTimelineKey1 = 'H'
-    expect(validate.single(invalidTimelineKey1, timelineKeySchema)).toBeTruthy()
+    expect(validateTimelineKey(invalidTimelineKey1)).toBeTruthy()
 
     const invalidTimelineKey2 = -1
-    expect(validate.single(invalidTimelineKey2, timelineKeySchema)).toBeTruthy()
+    expect(validateTimelineKey(invalidTimelineKey2)).toBeTruthy()
 
     const validTimelineKey = 1
-    expect(validate.single(validTimelineKey, timelineKeySchema)).toBeFalsy()
+    expect(validateTimelineKey(validTimelineKey)).toBeFalsy()
   })
 
   it('should validate date column', function () {
     const invalidDateColumn = 1
 
-    expect(validate.single(invalidDateColumn, columnNameSchema)).toBeTruthy()
+    expect(validateColumnName(invalidDateColumn)).toBeTruthy()
 
     const invalidDateColumn1 = ''
 
-    expect(validate.single(invalidDateColumn1, columnNameSchema)).toBeTruthy()
+    expect(validateColumnName(invalidDateColumn1)).toBeTruthy()
 
     const validDateColumn = 'Date'
-    expect(validate.single(validDateColumn, columnNameSchema)).toBeFalsy()
+    expect(validateColumnName(validDateColumn)).toBeFalsy()
   })
 
   it('should validate price information', function () {
@@ -51,13 +49,13 @@ describe('Should test validations', function () {
       { [dateColumn]: '2016-12-01' }
     ]
 
-    expect(validate.single(invalidPrice, priceSchema({ dateColumn, operationColumn }))).toBeTruthy()
+    expect(validatePrices(invalidPrice, dateColumn, operationColumn)).toBeTruthy()
 
     const validPrice = [
       { [dateColumn]: '2016-12-01', [operationColumn]: 200.1 }
     ]
 
-    expect(validate.single(validPrice, priceSchema({ dateColumn, operationColumn }))).toBeFalsy()
+    expect(validatePrices(validPrice, dateColumn, operationColumn)).toBeFalsy()
   })
 
   it('should validate calendar', function () {
@@ -65,19 +63,19 @@ describe('Should test validations', function () {
       Date: '2016-12-01'
     }]
 
-    expect(validate.single(validCalendar, calendarSchema)).toBeFalsy()
+    expect(validateCalendar(validCalendar)).toBeFalsy()
 
     const invalidCalendar = {
       '2016': ''
     }
 
-    expect(validate.single(invalidCalendar, calendarSchema)).toBeTruthy()
+    expect(validateCalendar(invalidCalendar)).toBeTruthy()
 
     const invalidCalendar1 = [{
       Date: ''
     }]
 
-    expect(validate.single(invalidCalendar1, calendarSchema)).toBeTruthy()
+    expect(validateCalendar(invalidCalendar1)).toBeTruthy()
   })
 
   it('Should check all event dates have enough stock data', function () {
@@ -143,7 +141,7 @@ describe('Should test validations', function () {
 
     const validMMStructure = extractMarketModelRequiredInfo(data)
 
-    expect(validate.single(validMMStructure, MMStructureSchema)).toBeFalsy()
+    expect(validateMMStructure(validMMStructure)).toBeFalsy()
 
     const invalidData = {
       calendar: [{
@@ -154,6 +152,6 @@ describe('Should test validations', function () {
 
     const invalidMMStructure = extractMarketModelRequiredInfo(invalidData)
 
-    expect(validate.single(invalidMMStructure, MMStructureSchema)).toBeTruthy()
+    expect(validateMMStructure(invalidMMStructure)).toBeTruthy()
   })
 })

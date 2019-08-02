@@ -1,5 +1,5 @@
 /* global it expect */
-import { MarketModel } from '../build/main.bundle'
+import { MarketModel } from './index'
 // @todo add more test to validate event study module
 const operationColumn = 'Close'
 const dateColumn = 'Date'

@@ -1,8 +1,9 @@
 import validate from './services/validate'
 import { marketModel, extractMarketModelRequiredInfo } from './services/eventStudy'
-import { MMStructureSchema } from './services/validation'
+import { validateMMStructure } from './services/validation'
 
 export { AAR, CAR } from './services/eventStudy'
+export * from './services/validation'
 
 /**
  * Process each date with market model
@@ -10,9 +11,19 @@ export { AAR, CAR } from './services/eventStudy'
  * @return {object|string} - result object or validation result
  */
 export const MarketModel = data => {
-  const MMStructure = extractMarketModelRequiredInfo(data)
+  const isInValidData = validate(data, {
+    calendar: {
+      presence: true,
+      type: 'array'
+    }
+  })
 
-  const validationResult = validate.single(MMStructure, MMStructureSchema)
+  let MMStructure
+
+  if (!isInValidData) MMStructure = extractMarketModelRequiredInfo(data)
+  else return isInValidData
+
+  const validationResult = validateMMStructure(MMStructure)
 
   if (!validationResult) return MMStructure.map(marketModel)
   else return validationResult
