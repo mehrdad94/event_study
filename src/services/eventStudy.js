@@ -11,6 +11,7 @@ import slice from 'ramda/src/slice'
 import prop from 'ramda/src/prop'
 import map from 'ramda/src/map'
 import mapObjIndexed from 'ramda/src/mapObjIndexed'
+import validate from './validate'
 import { defaultDateColumn, defaultOperationColumn, defaultTimeLine } from '../config/defaults'
 
 const RETURN_PROP = 'Return'
@@ -136,9 +137,9 @@ export const CAR = AR => AR.reduce((a, b, i) => {
  * @param stockData {array<object>} - stock information
  * @param marketData {array<object>} - market information
  * @param timeline {object} - timeline properties
- * @return {object}
+ * @return {object|string}
  */
-export const extractDateWindows = ({ indexStock, indexMarket, stockData, marketData, timeline }) => {
+export const extractDateWindows = ({ indexStock, indexMarket, stockData, marketData, timeline, dateColumn }) => {
   const { T0T1, T1E, ET2, T2T3 } = timeline
 
   const indexesStockEstimationWindow = [indexStock - T1E - T0T1 + 1, indexStock - T1E + 1]
@@ -158,6 +159,15 @@ export const extractDateWindows = ({ indexStock, indexMarket, stockData, marketD
 
   const stockPostEventWindow = slice(indexesStockPostEventWindow[0], indexesStockPostEventWindow[1], stockData)
   const marketPostEventWindow = slice(indexesMarketPostEventWindow[0], indexesMarketPostEventWindow[1], marketData)
+
+  // stock and market data should have equal dates
+  const preEventValidation = validate.single([stockEstimationWindow, marketEstimationWindow], { arrayWithEqualField: { field: dateColumn } })
+  const eventValidation = validate.single([stockEventWindow, marketEventWindow], { arrayWithEqualField: { field: dateColumn } })
+  const postEventValidation = validate.single([stockPostEventWindow, marketPostEventWindow], { arrayWithEqualField: { field: dateColumn } })
+
+  if (preEventValidation) return preEventValidation.toString()
+  if (eventValidation) return eventValidation.toString()
+  if (postEventValidation) return postEventValidation.toString()
 
   return {
     stockEstimationWindow,
@@ -198,8 +208,12 @@ export const marketModel = ({ date, stock, market, timeline, dateColumn, operati
     marketData: marketWithReturns,
     indexStock: dateIndexStock,
     indexMarket: dateIndexMarket,
-    timeline
+    timeline,
+    dateColumn
   })
+
+  // if timelineWindow has error
+  if (typeof timelineWindows === 'string') return timelineWindows
 
   const timelineWindowsReturns = mapObjIndexed(mapByReturnColumn, timelineWindows)
   const { stockEstimationWindow, marketEstimationWindow, stockEventWindow, marketEventWindow } = timelineWindowsReturns
@@ -226,8 +240,7 @@ export const marketModel = ({ date, stock, market, timeline, dateColumn, operati
   const significantTest = testSignificant(statisticalTest)
 
   // get return dates
-  const returnDateIndexes = [dateIndexStock - timeline.T1E + 1, dateIndexStock + timeline.ET2 + 1]
-  const returnDates = slice(returnDateIndexes[0], returnDateIndexes[1], stock).map(prop(dateColumn))
+  const returnDates = timelineWindows.stockEventWindow.map(prop(dateColumn))
 
   return {
     date,
