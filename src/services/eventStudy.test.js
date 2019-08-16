@@ -172,10 +172,10 @@ it('Should calculate average abnormal return', function () {
   const returns = [
     [1, 1, 1],
     [2, 2, 2],
-    [3, 3, 3]
+    [3, 6, 9]
   ]
 
-  const result = [2, 2, 2]
+  const result = [2, 3, 4]
 
   expect(AAR(returns)).toEqual(result)
 })
