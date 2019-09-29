@@ -1,5 +1,5 @@
 /* global it expect describe */
-import { MarketModel } from './index'
+import { MarketModel, MeanModel } from './index'
 // @todo add more test to validate event study module
 
 import APPL from './data/AAPL.json'
@@ -39,6 +39,39 @@ describe('should test library', function () {
     }
 
     const result = MarketModel(validBody)
+    const { normalReturn, abnormalReturn, statisticalTest, significantTest } = result[0]
+    expect(normalReturn.toString()).toBe('1,1,1,1')
+    expect(abnormalReturn.toString()).toBe('0,0,0,0')
+    expect(statisticalTest.toString()).toBe('NaN,NaN,NaN,NaN')
+    expect(significantTest.toString()).toBe('false,false,false,false')
+  })
+
+  it('should test mean model', function () {
+    const timeline = {
+      T0T1: 2,
+      T1E: 2,
+      ET2: 2,
+      T2T3: 2
+    }
+
+    const stock = seqGenerator(11).map(fakeStockDataGenerator)
+
+    const date = '6'
+
+    const calendar = [{
+      date,
+      timeline,
+      stock,
+      operationColumn,
+      dateColumn
+    }]
+
+    const validBody = {
+      calendar
+    }
+
+    const result = MeanModel(validBody)
+
     const { normalReturn, abnormalReturn, statisticalTest, significantTest } = result[0]
     expect(normalReturn.toString()).toBe('1,1,1,1')
     expect(abnormalReturn.toString()).toBe('0,0,0,0')

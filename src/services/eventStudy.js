@@ -1,6 +1,7 @@
 import regression from 'regression'
 import mean from 'ramda/src/mean'
 import sum from 'ramda/src/sum'
+import repeat from 'ramda/src/repeat'
 import divide from 'ramda/src/divide'
 import subtract from 'ramda/src/subtract'
 import __ from 'ramda/src/__'
@@ -135,47 +136,56 @@ export const CAR = AR => AR.reduce((a, b, i) => {
  * create arrays for every part (estimation window, observation window, post event window)
  * @param date {string} - calendar dates
  * @param stockData {array<object>} - stock information
- * @param marketData {array<object>} - market information
+ * @param marketData [{array<object>}] - market information
  * @param timeline {object} - timeline properties
  * @return {object|string}
  */
-export const extractDateWindows = ({ indexStock, indexMarket, stockData, marketData, timeline, dateColumn }) => {
+export const extractDateWindows = ({ indexStock, indexMarket, stockData, marketData, timeline, dateColumn, type = 'marketModel' }) => {
   const { T0T1, T1E, ET2, T2T3 } = timeline
 
   const indexesStockEstimationWindow = [indexStock - T1E - T0T1 + 1, indexStock - T1E + 1]
-  const indexesMarketEstimationWindow = [indexMarket - T1E - T0T1 + 1, indexMarket - T1E + 1]
-
   const indexesStockEventWindow = [indexStock - T1E + 1, indexStock + ET2 + 1]
-  const indexesMarketEventWindow = [indexMarket - T1E + 1, indexMarket + ET2 + 1]
-
   const indexesStockPostEventWindow = [indexStock + ET2 + 1, indexStock + ET2 + T2T3 + 1]
-  const indexesMarketPostEventWindow = [indexMarket + ET2 + 1, indexMarket + ET2 + T2T3 + 1]
-
   const stockEstimationWindow = slice(indexesStockEstimationWindow[0], indexesStockEstimationWindow[1], stockData)
-  const marketEstimationWindow = slice(indexesMarketEstimationWindow[0], indexesMarketEstimationWindow[1], marketData)
-
   const stockEventWindow = slice(indexesStockEventWindow[0], indexesStockEventWindow[1], stockData)
-  const marketEventWindow = slice(indexesMarketEventWindow[0], indexesMarketEventWindow[1], marketData)
-
   const stockPostEventWindow = slice(indexesStockPostEventWindow[0], indexesStockPostEventWindow[1], stockData)
-  const marketPostEventWindow = slice(indexesMarketPostEventWindow[0], indexesMarketPostEventWindow[1], marketData)
+
+  let marketEstimationWindow
+  let marketEventWindow
+  let marketPostEventWindow
 
   // stock and market data should have equal dates
-  const preEventValidation = validate.single([stockEstimationWindow, marketEstimationWindow], { arrayWithEqualField: { field: dateColumn } })
-  const eventValidation = validate.single([stockEventWindow, marketEventWindow], { arrayWithEqualField: { field: dateColumn } })
-  const postEventValidation = validate.single([stockPostEventWindow, marketPostEventWindow], { arrayWithEqualField: { field: dateColumn } })
+  if (type === 'marketModel') {
+    const indexesMarketEstimationWindow = [indexMarket - T1E - T0T1 + 1, indexMarket - T1E + 1]
+    const indexesMarketEventWindow = [indexMarket - T1E + 1, indexMarket + ET2 + 1]
+    const indexesMarketPostEventWindow = [indexMarket + ET2 + 1, indexMarket + ET2 + T2T3 + 1]
 
-  if (preEventValidation) return preEventValidation.toString()
-  if (eventValidation) return eventValidation.toString()
-  if (postEventValidation) return postEventValidation.toString()
+    marketEstimationWindow = slice(indexesMarketEstimationWindow[0], indexesMarketEstimationWindow[1], marketData)
+    marketEventWindow = slice(indexesMarketEventWindow[0], indexesMarketEventWindow[1], marketData)
+    marketPostEventWindow = slice(indexesMarketPostEventWindow[0], indexesMarketPostEventWindow[1], marketData)
 
-  return {
-    stockEstimationWindow,
-    marketEstimationWindow,
-    stockEventWindow,
-    marketEventWindow,
-    stockPostEventWindow,
-    marketPostEventWindow
+    const preEventValidation = validate.single([stockEstimationWindow, marketEstimationWindow], { arrayWithEqualField: { field: dateColumn } })
+    const eventValidation = validate.single([stockEventWindow, marketEventWindow], { arrayWithEqualField: { field: dateColumn } })
+    const postEventValidation = validate.single([stockPostEventWindow, marketPostEventWindow], { arrayWithEqualField: { field: dateColumn } })
+
+    if (preEventValidation) return preEventValidation.toString()
+    if (eventValidation) return eventValidation.toString()
+    if (postEventValidation) return postEventValidation.toString()
+
+    return {
+      stockEstimationWindow,
+      marketEstimationWindow,
+      stockEventWindow,
+      marketEventWindow,
+      stockPostEventWindow,
+      marketPostEventWindow
+    }
+  } else {
+    return {
+      stockEstimationWindow,
+      stockEventWindow,
+      stockPostEventWindow
+    }
   }
 }
 
@@ -255,6 +265,78 @@ export const marketModel = ({ date, stock, market, timeline, dateColumn, operati
 }
 
 /**
+ * calculate Mean model
+ * @param dateColumn {string}
+ * @param operationColumn {string}
+ * @param date {string}
+ * @param stock {array}
+ * @param market {array}
+ * @param timeline {object}
+ * @return {object}
+ */
+export const meanModel = ({ date, stock, timeline, dateColumn, operationColumn }) => {
+  // helpers
+  const getReturnColumn = prop(RETURN_PROP)
+  const mapByReturnColumn = map(getReturnColumn)
+  const findDateIndex = findIndex(propEq(dateColumn, date))
+  // add return prop to stock and market data
+  const stockWithReturns = addReturns(stock, operationColumn)
+
+  // extract timeline window from stock and market data
+  const dateIndexStock = findDateIndex(stockWithReturns)
+
+  const timelineWindows = extractDateWindows({
+    date,
+    stockData: stockWithReturns,
+    indexStock: dateIndexStock,
+    timeline,
+    dateColumn,
+    type: 'meanModel'
+  })
+
+  // if timelineWindow has error
+  if (typeof timelineWindows === 'string') return timelineWindows
+
+  const timelineWindowsReturns = mapObjIndexed(mapByReturnColumn, timelineWindows)
+  const { stockEstimationWindow, stockEventWindow } = timelineWindowsReturns
+  const meanStockEstimationWindow = mean(stockEstimationWindow)
+  const marketEstimationWindow = repeat(meanStockEstimationWindow, stockEstimationWindow.length)
+  // get regression error
+  const regressionError = regressionStandardError(stockEstimationWindow, marketEstimationWindow)
+
+  // get normal returns
+  const normalReturn = repeat(meanStockEstimationWindow, stockEventWindow.length)
+
+  // get abnormal return
+  const abnormalReturn = returnsAbnormal(stockEventWindow, normalReturn)
+
+  // see what kind of news was that
+  const newsType = getNewsType(abnormalReturn[timeline.T1E - 1])
+
+  // get CARS
+  const CARS = CAR(abnormalReturn)
+
+  // get statistical test
+  const statisticalTest = testStatistic(abnormalReturn, regressionError)
+
+  // get significant test
+  const significantTest = testSignificant(statisticalTest)
+
+  // get return dates
+  const returnDates = timelineWindows.stockEventWindow.map(prop(dateColumn))
+
+  return {
+    date,
+    normalReturn,
+    abnormalReturn,
+    statisticalTest,
+    significantTest,
+    CARS,
+    newsType,
+    returnDates
+  }
+}
+/**
  * Extract required information for market model analysis
  * @param {array} calendar
  * @param {array<object>} [stock]
@@ -283,7 +365,32 @@ export const extractMarketModelRequiredInfo = ({
     }
   })
 }
-
+/**
+ * Extract required information for mean model analysis
+ * @param {array} calendar
+ * @param {array<object>} [stock]
+ * @param {object} [timeline]
+ * @param {string} [dateColumn]
+ * @param {string} [operationColumn]
+ * @returns {array<object>}
+ */
+export const extractMeanModelRequiredInfo = ({
+  calendar,
+  stock,
+  timeline = defaultTimeLine,
+  dateColumn = defaultDateColumn,
+  operationColumn = defaultOperationColumn }
+) => {
+  return calendar.map((event = {}) => {
+    return {
+      date: event.date,
+      stock: event.stock || stock,
+      timeline: event.timeline || timeline,
+      dateColumn: event.dateColumn || dateColumn,
+      operationColumn: event.operationColumn || operationColumn
+    }
+  })
+}
 /**
  * Calculate Average Abnormal Return
  * @param {array} returns

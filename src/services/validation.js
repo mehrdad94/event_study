@@ -70,7 +70,7 @@ export const hasEnoughPrices = (prices, date, timeline, dateProp = defaultDateCo
   else return pricesLength - 1 - index >= timeline['ET2'] + timeline['T2T3']
 }
 
-const MMStructureSchema = {
+const MarketModelStructureSchema = {
   presence: true,
   type: 'array',
   forEach: {
@@ -86,4 +86,20 @@ const MMStructureSchema = {
   }
 }
 
-export const validateMMStructure = value => validate.single(value, MMStructureSchema)
+const MeanModelStructureSchema = {
+  presence: true,
+  type: 'array',
+  forEach: {
+    date: columnNameSchema,
+    stock: priceSchema,
+    'timeline.T0T1': timelineKeySchema,
+    'timeline.T1E': timelineKeySchema,
+    'timeline.ET2': timelineKeySchema,
+    'timeline.T2T3': timelineKeySchema,
+    dateColumn: columnNameSchema,
+    operationColumn: columnNameSchema
+  }
+}
+
+export const validateMMStructure = value => validate.single(value, MarketModelStructureSchema)
+export const validateMeanModelStructure = value => validate.single(value, MeanModelStructureSchema)

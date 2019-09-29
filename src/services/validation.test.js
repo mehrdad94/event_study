@@ -5,11 +5,13 @@ import {
   validatePrices,
   validateCalendar,
   validateMMStructure,
+  validateMeanModelStructure,
   hasEnoughPrices
 } from './validation'
 
 import {
-  extractMarketModelRequiredInfo
+  extractMarketModelRequiredInfo,
+  extractMeanModelRequiredInfo
 } from './eventStudy.js'
 
 describe('Should test validations', function () {
@@ -153,5 +155,51 @@ describe('Should test validations', function () {
     const invalidMMStructure = extractMarketModelRequiredInfo(invalidData)
 
     expect(validateMMStructure(invalidMMStructure)).toBeTruthy()
+  })
+
+  it('should validate mean model request', function () {
+    const timeline = {
+      T0T1: 1,
+      T1E: 1,
+      ET2: 1,
+      T2T3: 1
+    }
+
+    const prices = [
+      { Date: '2016-12-01', Close: 1234 },
+      { Date: '2016-12-02', Close: 1234 },
+      { Date: '2016-12-03', Close: 1234 },
+      { Date: '2016-12-04', Close: 1234 },
+      { Date: '2016-12-05', Close: 1234 },
+      { Date: '2016-12-06', Close: 1234 },
+      { Date: '2016-12-07', Close: 1234 },
+      { Date: '2016-12-08', Close: 1234 },
+      { Date: '2016-12-09', Close: 1234 },
+      { Date: '2016-12-10', Close: 1234 },
+      { Date: '2016-12-11', Close: 1234 },
+      { Date: '2016-12-12', Close: 1234 }
+    ]
+
+    const data = {
+      calendar: [{
+        date: '2016-12-06',
+        stock: prices,
+        timeline
+      }]
+    }
+
+    const validMMStructure = extractMeanModelRequiredInfo(data)
+
+    expect(validateMeanModelStructure(validMMStructure)).toBeFalsy()
+
+    const invalidData = {
+      calendar: [{
+        stock: prices
+      }]
+    }
+
+    const invalidMMStructure = extractMeanModelRequiredInfo(invalidData)
+
+    expect(validateMeanModelStructure(invalidMMStructure)).toBeTruthy()
   })
 })

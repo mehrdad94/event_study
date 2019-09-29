@@ -12,6 +12,13 @@ Run `npm install event-study --save`.
     * significantTest
     * CARS
     * newsType (Good, Bad, neutral)
+* Constant Mean Model
+    * normalReturn
+    * abnormalReturn
+    * statisticalTest
+    * significantTest
+    * CARS
+    * newsType (Good, Bad, neutral)
 ## Terminology
 ##### calendar: array of event dates.
 ##### stock: stock prices.
@@ -24,7 +31,7 @@ Run `npm install event-study --save`.
 #### Market Model
 ##### Option one: provide information for each date separately. 
 ```
-import { marketModel } from 'event-study'
+import { MarketModel } from 'event-study'
 
 const data = {
     calendar: [{
@@ -47,7 +54,7 @@ marketModel(data)
 ##### Option two: provide information globally.
 In this method, every date will use same global information.
 ```
-import { marketModel } from 'event-study'
+import { MarketModel } from 'event-study'
 
 const data = {
     calendar: [
@@ -71,7 +78,7 @@ marketModel(data)
 In this method for date '2016-12-01' the global information(stock) will be ignored.
 
 ```
-import { marketModel } from 'event-study'
+import { MarketModel } from 'event-study'
 
 const data = {
     calendar: [
@@ -92,6 +99,26 @@ const data = {
 marketModel(data)
 ```
 
+#### Constant Mean Model
+```
+import { MeanModel } from 'event-study'
+
+const data = {
+    calendar: [
+        { date: '2016-12-01', stock: [{ Date: '2016-12-01', Close: 30 }] }
+    ],
+    timeline: {
+        T0T1: 2,
+        T1E: 2,
+        ET2: 2,
+        T2T3: 2
+    },
+    dateColumn: 'Date',
+    operationColumn: 'Close'
+}
+
+marketModel(data)
+```
 ## Analyse results
 Results will be in below format:
 
