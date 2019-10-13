@@ -212,6 +212,9 @@ export const marketModel = ({ date, stock, market, timeline, dateColumn, operati
   const dateIndexStock = findDateIndex(stockWithReturns)
   const dateIndexMarket = findDateIndex(marketWithReturns)
 
+  if (dateIndexStock === -1) return `${date} does not exist in stock dataset`
+  if (dateIndexMarket === -1) return `${date} does not exist in market dataset`
+
   const timelineWindows = extractDateWindows({
     date,
     stockData: stockWithReturns,
@@ -284,6 +287,8 @@ export const meanModel = ({ date, stock, timeline, dateColumn, operationColumn }
 
   // extract timeline window from stock and market data
   const dateIndexStock = findDateIndex(stockWithReturns)
+
+  if (dateIndexStock === -1) return `${date} does not exist in stock dataset`
 
   const timelineWindows = extractDateWindows({
     date,

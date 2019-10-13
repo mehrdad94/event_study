@@ -4,6 +4,8 @@ import { MarketModel, MeanModel } from './index'
 
 import APPL from './data/AAPL.json'
 import SP500 from './data/GSPC.json'
+import APPLFull from './data/AAPLFull.json'
+import SP500Full from './data/GSPCFull.json'
 
 const operationColumn = 'Close'
 const dateColumn = 'Date'
@@ -240,5 +242,24 @@ describe('should test library', function () {
       '2019-06-03',
       '2019-06-04'
     ])
+  })
+
+  it('should return error if date does not exist', function () {
+    const date = '2018-09-29'
+
+    const timeline = {
+      T0T1: 40,
+      T1E: 10,
+      ET2: 10,
+      T2T3: 2
+    }
+
+    const data = {
+      calendar: [{ date, timeline, market: SP500Full, stock: APPLFull, operationColumn, dateColumn }]
+    }
+
+    const result = MarketModel(data)[0]
+
+    expect(result).toBe('2018-09-29 does not exist in stock dataset')
   })
 })
