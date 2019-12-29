@@ -10,7 +10,7 @@ import {
   extractDateWindows,
   returnsDaily,
   getNewsType,
-  marketModel,
+  model,
   AAR
 } from './eventStudy'
 import findIndex from 'ramda/src/findIndex'
@@ -91,8 +91,8 @@ describe('event study main service', function () {
   })
 
   it('should test date extraction', function () {
-    const fakeDateGen = n => ({ Date: n.toString() })
-    const lookupDate = '3'
+    const fakeDateGen = n => ({ Date: `2019-05-${n < 10 ? '0' + n : n}` })
+    const lookupDate = '2019-05-03'
     const stockAndMarketData = [fakeDateGen(1), fakeDateGen(2), fakeDateGen(3), fakeDateGen(4), fakeDateGen(5)]
     const timeline = {
       T0T1: 1,
@@ -120,9 +120,9 @@ describe('event study main service', function () {
   })
 
   it('Should compute Market model', function () {
-    const fakeStockDataGen = n => ({ Date: n, Close: 2 ** n })
+    const fakeStockDataGen = n => ({ Date: `2019-05-${n < 10 ? '0' + n : n}`, Close: 2 ** n })
     const state = {
-      date: 6,
+      date: '2019-05-06',
       market: [
         fakeStockDataGen(1),
         fakeStockDataGen(2),
@@ -157,14 +157,14 @@ describe('event study main service', function () {
       dateColumn: 'Date'
     }
 
-    const result = marketModel(state)
+    const result = model(state, 'MARKET_MODEL')
 
     expect(result.normalReturn.toString()).toBe('1,1,1,1')
     expect(result.abnormalReturn.toString()).toBe('0,0,0,0')
     expect(result.statisticalTest.toString()).toBe('NaN,NaN,NaN,NaN')
     expect(result.significantTest.toString()).toBe('false,false,false,false')
     expect(result.newsType).toBe(0)
-    expect(result.returnDates.toString()).toBe('5,6,7,8')
+    expect(result.returnDates.toString()).toBe('2019-05-05,2019-05-06,2019-05-07,2019-05-08')
   })
 })
 

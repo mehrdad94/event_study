@@ -5,8 +5,7 @@ import {
   validatePrices,
   validateCalendar,
   validateMMStructure,
-  validateMeanModelStructure,
-  hasEnoughPrices
+  validateMeanModelStructure
 } from './validation'
 
 import {
@@ -78,35 +77,6 @@ describe('Should test validations', function () {
     }]
 
     expect(validateCalendar(invalidCalendar1)).toBeTruthy()
-  })
-
-  it('Should check all event dates have enough stock data', function () {
-    const timeline = {
-      T0T1: 1,
-      T1E: 1,
-      ET2: 1,
-      T2T3: 1
-    }
-    const prices = [
-      { Date: '2016-12-01' },
-      { Date: '2016-12-02' },
-      { Date: '2016-12-03' },
-      { Date: '2016-12-04' },
-      { Date: '2016-12-05' },
-      { Date: '2016-12-06' },
-      { Date: '2016-12-07' },
-      { Date: '2016-12-08' },
-      { Date: '2016-12-09' },
-      { Date: '2016-12-10' },
-      { Date: '2016-12-11' },
-      { Date: '2016-12-12' }
-    ]
-
-    expect(hasEnoughPrices(prices, '2016-12-02', timeline)).toBe(true)
-
-    expect(hasEnoughPrices(prices, '2016-12-01', timeline)).toBe(false)
-
-    expect(hasEnoughPrices(prices, '2016-12-11', timeline)).toBe(false)
   })
 
   it('should validate market model request', function () {

@@ -1,8 +1,4 @@
 import validate from './validate'
-import findIndex from 'ramda/src/findIndex'
-import propEq from 'ramda/src/propEq'
-
-import { defaultDateColumn } from '../config/defaults'
 
 const timelineKeySchema = {
   presence: true,
@@ -53,22 +49,6 @@ const calendarSchema = {
 
 export const validateCalendar = value => validate.single(value, calendarSchema)
 
-/**
-  Check every date in calendar has enough data (from timeline)
-  @param {array<object>} prices
-  @param {string} date
-  @param {object} timeline
-  @param {string} [dateProp]
-  @return {boolean, array<object>} - array of invalids
-*/
-export const hasEnoughPrices = (prices, date, timeline, dateProp = defaultDateColumn) => {
-  const index = findIndex(propEq(dateProp, date))(prices)
-  const pricesLength = prices.length
-
-  if (index === -1) return false
-  else if (timeline['T0T1'] + timeline['T1E'] - 1 > index) return false
-  else return pricesLength - 1 - index >= timeline['ET2'] + timeline['T2T3']
-}
 
 const MarketModelStructureSchema = {
   presence: true,

@@ -10,7 +10,11 @@ import SP500Full from './data/GSPCFull.json'
 const operationColumn = 'Close'
 const dateColumn = 'Date'
 // helper
-const fakeStockDataGenerator = n => ({ Date: `${n}`, Close: 2 ** n })
+const fakeStockDataGenerator = n => {
+  if (n < 10) n = '0' + n
+  if (n > 30) throw new Error('does not support more than 30 range')
+  return ({ Date: `2019-05-${n}`, Close: 2 ** n })
+}
 const seqGenerator = n => n !== 1 ? [...seqGenerator(n - 1), n] : [n]
 
 describe('should test library', function () {
@@ -25,7 +29,7 @@ describe('should test library', function () {
     const market = seqGenerator(11).map(fakeStockDataGenerator)
     const stock = seqGenerator(22).map(fakeStockDataGenerator)
 
-    const date = '6'
+    const date = '2019-05-06'
 
     const calendar = [{
       date,
@@ -58,7 +62,7 @@ describe('should test library', function () {
 
     const stock = seqGenerator(11).map(fakeStockDataGenerator)
 
-    const date = '6'
+    const date = '2019-05-06'
 
     const calendar = [{
       date,
@@ -90,46 +94,46 @@ describe('should test library', function () {
     }
 
     const stock = [
-      { Date: '1', Close: 100 },
-      { Date: '2', Close: 110 },
-      { Date: '3', Close: 100 },
-      { Date: '4', Close: 130 },
-      { Date: '5', Close: 120 },
-      { Date: '6', Close: 100 },
-      { Date: '7', Close: 110 },
-      { Date: '8', Close: 105 },
-      { Date: '9', Close: 98 },
-      { Date: '10', Close: 95 },
-      { Date: '11', Close: 105 },
-      { Date: '12', Close: 40 },
-      { Date: '13', Close: 105 },
-      { Date: '14', Close: 120 },
-      { Date: '15', Close: 100 },
-      { Date: '16', Close: 105 },
-      { Date: '17', Close: 102 }
+      { Date: '2019-05-01', Close: 100 },
+      { Date: '2019-05-02', Close: 110 },
+      { Date: '2019-05-03', Close: 100 },
+      { Date: '2019-05-04', Close: 130 },
+      { Date: '2019-05-05', Close: 120 },
+      { Date: '2019-05-06', Close: 100 },
+      { Date: '2019-05-07', Close: 110 },
+      { Date: '2019-05-08', Close: 105 },
+      { Date: '2019-05-09', Close: 98 },
+      { Date: '2019-05-10', Close: 95 },
+      { Date: '2019-05-11', Close: 105 },
+      { Date: '2019-05-12', Close: 40 },
+      { Date: '2019-05-13', Close: 105 },
+      { Date: '2019-05-14', Close: 120 },
+      { Date: '2019-05-15', Close: 100 },
+      { Date: '2019-05-16', Close: 105 },
+      { Date: '2019-05-17', Close: 102 }
     ]
 
     const market = [
-      { Date: '1', Close: 50 },
-      { Date: '2', Close: 80 },
-      { Date: '3', Close: 65 },
-      { Date: '4', Close: 70 },
-      { Date: '5', Close: 65 },
-      { Date: '6', Close: 50 },
-      { Date: '7', Close: 45 },
-      { Date: '8', Close: 55 },
-      { Date: '9', Close: 50 },
-      { Date: '10', Close: 80 },
-      { Date: '11', Close: 85 },
-      { Date: '12', Close: 92 },
-      { Date: '13', Close: 90 },
-      { Date: '14', Close: 95 },
-      { Date: '15', Close: 90 },
-      { Date: '16', Close: 92 },
-      { Date: '17', Close: 91 }
+      { Date: '2019-05-01', Close: 50 },
+      { Date: '2019-05-02', Close: 80 },
+      { Date: '2019-05-03', Close: 65 },
+      { Date: '2019-05-04', Close: 70 },
+      { Date: '2019-05-05', Close: 65 },
+      { Date: '2019-05-06', Close: 50 },
+      { Date: '2019-05-07', Close: 45 },
+      { Date: '2019-05-08', Close: 55 },
+      { Date: '2019-05-09', Close: 50 },
+      { Date: '2019-05-10', Close: 80 },
+      { Date: '2019-05-11', Close: 85 },
+      { Date: '2019-05-12', Close: 92 },
+      { Date: '2019-05-13', Close: 90 },
+      { Date: '2019-05-14', Close: 95 },
+      { Date: '2019-05-15', Close: 90 },
+      { Date: '2019-05-16', Close: 92 },
+      { Date: '2019-05-17', Close: 91 }
     ]
 
-    let date = '12'
+    let date = '2019-05-12'
 
     const negativeNewsType = {
       calendar: [{ date, timeline, market, stock, operationColumn, dateColumn }]
@@ -138,7 +142,7 @@ describe('should test library', function () {
     let result = MarketModel(negativeNewsType)
     expect(result[0].newsType).toBe(-1)
 
-    date = '13'
+    date = '2019-05-13'
 
     const positiveNewsType = {
       calendar: [{ date, timeline, market, stock, operationColumn, dateColumn }]
@@ -157,52 +161,52 @@ describe('should test library', function () {
     }
 
     const stock = [
-      { Date: '1', Close: 100 },
-      { Date: '2', Close: 110 },
-      { Date: '3', Close: 100 },
-      { Date: '4', Close: 130 },
-      { Date: '5', Close: 120 },
-      { Date: '6', Close: 100 },
-      { Date: '7', Close: 110 },
-      { Date: '8', Close: 105 },
-      { Date: '10', Close: 95 },
-      { Date: '11', Close: 105 },
-      { Date: '12', Close: 40 },
-      { Date: '13', Close: 105 },
-      { Date: '14', Close: 120 },
-      { Date: '15', Close: 100 },
-      { Date: '16', Close: 105 },
-      { Date: '17', Close: 102 }
+      { Date: '2019-05-01', Close: 100 },
+      { Date: '2019-05-02', Close: 110 },
+      { Date: '2019-05-03', Close: 100 },
+      { Date: '2019-05-04', Close: 130 },
+      { Date: '2019-05-05', Close: 120 },
+      { Date: '2019-05-06', Close: 100 },
+      { Date: '2019-05-07', Close: 110 },
+      { Date: '2019-05-08', Close: 105 },
+      { Date: '2019-05-10', Close: 95 },
+      { Date: '2019-05-11', Close: 105 },
+      { Date: '2019-05-12', Close: 40 },
+      { Date: '2019-05-13', Close: 105 },
+      { Date: '2019-05-14', Close: 120 },
+      { Date: '2019-05-15', Close: 100 },
+      { Date: '2019-05-16', Close: 105 },
+      { Date: '2019-05-17', Close: 102 }
     ]
 
     const market = [
-      { Date: '1', Close: 50 },
-      { Date: '2', Close: 80 },
-      { Date: '3', Close: 65 },
-      { Date: '4', Close: 70 },
-      { Date: '5', Close: 65 },
-      { Date: '6', Close: 50 },
-      { Date: '7', Close: 45 },
-      { Date: '8', Close: 55 },
-      { Date: '9', Close: 50 },
-      { Date: '10', Close: 80 },
-      { Date: '11', Close: 85 },
-      { Date: '12', Close: 92 },
-      { Date: '13', Close: 90 },
-      { Date: '14', Close: 95 },
-      { Date: '15', Close: 90 },
-      { Date: '16', Close: 92 },
-      { Date: '17', Close: 91 }
+      { Date: '2019-05-01', Close: 50 },
+      { Date: '2019-05-02', Close: 80 },
+      { Date: '2019-05-03', Close: 65 },
+      { Date: '2019-05-04', Close: 70 },
+      { Date: '2019-05-05', Close: 65 },
+      { Date: '2019-05-06', Close: 50 },
+      { Date: '2019-05-07', Close: 45 },
+      { Date: '2019-05-08', Close: 55 },
+      { Date: '2019-05-09', Close: 50 },
+      { Date: '2019-05-10', Close: 80 },
+      { Date: '2019-05-11', Close: 85 },
+      { Date: '2019-05-12', Close: 92 },
+      { Date: '2019-05-13', Close: 90 },
+      { Date: '2019-05-14', Close: 95 },
+      { Date: '2019-05-15', Close: 90 },
+      { Date: '2019-05-16', Close: 92 },
+      { Date: '2019-05-17', Close: 91 }
     ]
 
-    let date = '12'
+    let date = '2019-05-12'
 
     const data = {
       calendar: [{ date, timeline, market, stock, operationColumn, dateColumn }]
     }
 
     const result = MarketModel(data)[0]
-    expect(typeof result).toBe('string')
+    expect(result).toContain('2019-05-09')
   })
   it('should test library with real dataset', function () {
     const date = '2019-05-20'

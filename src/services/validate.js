@@ -1,6 +1,5 @@
 import validate from 'validate.js'
 import pluck from 'ramda/src/pluck'
-import equals from 'ramda/src/equals'
 
 validate.validators.forEach = (arrayItems, itemConstraints) => {
   if (!Array.isArray(arrayItems)) return null
@@ -28,8 +27,20 @@ validate.validators.arrayWithEqualField = (arrays, { field = '' }) => {
     const firstFields = getFields(arrays[0])
     const secondFields = getFields(arrays[1])
 
-    if (equals(firstFields, secondFields)) return null
-    else return 'Has unmatched fields'
+    const diffObject = firstFields.reduce((a, b) => {
+      a[b] = b
+      return a
+    }, {})
+
+    secondFields.forEach(item => {
+      if (diffObject[item]) delete diffObject[item]
+      else diffObject[item] = item
+    })
+
+    const diff = Object.keys(diffObject)
+
+    if (!diff.length) return null
+    else return `Has unmatched fields: ${diff.toString()}`
   } else {
     throw new Error('field does not exist')
   }
