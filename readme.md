@@ -12,7 +12,7 @@ Run `npm install event-study --save`.
     * significantTest
     * CARS
     * newsType (Good, Bad, neutral)
-    * unmatchedTradingDayStrategies
+    * unmatchedTradingDayStrategy
 * Constant Mean Model
     * normalReturn
     * abnormalReturn
@@ -20,7 +20,7 @@ Run `npm install event-study --save`.
     * significantTest
     * CARS
     * newsType (Good, Bad, neutral)
-    * unmatchedTradingDayStrategies
+    * unmatchedTradingDayStrategy
 ## Terminology
 ##### calendar: array of event dates.
 ##### stock: stock prices.
@@ -28,7 +28,7 @@ Run `npm install event-study --save`.
 ##### timeline: event study time line that includes: Estimation period (T0T1), Pre-announcement window (T1E), Post-announcement window (ET2), Post-event period (T2T3).
 ##### dateColumn: which field in stock or market prices has date format. 
 ##### operationColumn: which field in stock or market price you want to perform arithmetic operations (default is Close).
-##### unmatchedTradingDayStrategies: if the event date does not exist we can select next trading day or previous trading day. available options are ( NEXT_TRADING_DAY , 'PREV_TRADING_DAY', 'SKIP'). skip is the default. 
+##### unmatchedTradingDayStrategy: if the event date does not exist we can select next trading day or previous trading day. available options are ( NEXT_TRADING_DAY , 'PREV_TRADING_DAY', 'SKIP'). skip is the default. 
 
 ## How to use
 #### Market Model
@@ -49,7 +49,7 @@ const data = {
             },
             dateColumn: 'Date',
             operationColumn: 'Close',
-            unmatchedTradingDayStrategies: 'NEXT_TRADING_DAY'
+            unmatchedTradingDayStrategy: 'NEXT_TRADING_DAY'
     }]
 }
 
@@ -74,7 +74,7 @@ const data = {
     },
     dateColumn: 'Date',
     operationColumn: 'Close',
-    unmatchedTradingDayStrategies: 'PREV_TRADING_DAY'
+    unmatchedTradingDayStrategy: 'PREV_TRADING_DAY'
 }
 
 marketModel(data)
@@ -99,7 +99,7 @@ const data = {
     },
     dateColumn: 'Date',
     operationColumn: 'Close',
-    unmatchedTradingDayStrategies: 'SKIP'
+    unmatchedTradingDayStrategy: 'SKIP'
 }
 
 marketModel(data)
