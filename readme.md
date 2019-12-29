@@ -12,6 +12,7 @@ Run `npm install event-study --save`.
     * significantTest
     * CARS
     * newsType (Good, Bad, neutral)
+    * unmatchedTradingDayStrategies
 * Constant Mean Model
     * normalReturn
     * abnormalReturn
@@ -19,13 +20,15 @@ Run `npm install event-study --save`.
     * significantTest
     * CARS
     * newsType (Good, Bad, neutral)
+    * unmatchedTradingDayStrategies
 ## Terminology
 ##### calendar: array of event dates.
 ##### stock: stock prices.
 ##### market: market prices.
 ##### timeline: event study time line that includes: Estimation period (T0T1), Pre-announcement window (T1E), Post-announcement window (ET2), Post-event period (T2T3).
 ##### dateColumn: which field in stock or market prices has date format. 
-##### operationColumn: which field in stock or market price you want to perform arithmetic operations (default is Close). 
+##### operationColumn: which field in stock or market price you want to perform arithmetic operations (default is Close).
+##### unmatchedTradingDayStrategies: if the event date does not exist we can select next trading day or previous trading day. available options are ( NEXT_TRADING_DAY , 'PREV_TRADING_DAY', 'SKIP'). skip is the default. 
 
 ## How to use
 #### Market Model
@@ -45,7 +48,8 @@ const data = {
                 T2T3: 2
             },
             dateColumn: 'Date',
-            operationColumn: 'Close'
+            operationColumn: 'Close',
+            unmatchedTradingDayStrategies: 'NEXT_TRADING_DAY'
     }]
 }
 
@@ -69,7 +73,8 @@ const data = {
         T2T3: 2
     },
     dateColumn: 'Date',
-    operationColumn: 'Close'
+    operationColumn: 'Close',
+    unmatchedTradingDayStrategies: 'PREV_TRADING_DAY'
 }
 
 marketModel(data)
@@ -93,7 +98,8 @@ const data = {
         T2T3: 2
     },
     dateColumn: 'Date',
-    operationColumn: 'Close'
+    operationColumn: 'Close',
+    unmatchedTradingDayStrategies: 'SKIP'
 }
 
 marketModel(data)

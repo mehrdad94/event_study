@@ -10,8 +10,9 @@ import slice from 'ramda/src/slice'
 import prop from 'ramda/src/prop'
 import map from 'ramda/src/map'
 import mapObjIndexed from 'ramda/src/mapObjIndexed'
+import moment from 'moment'
 import validate from './validate'
-import { defaultDateColumn, defaultOperationColumn, defaultTimeLine } from '../config/defaults'
+import { defaultDateColumn, defaultOperationColumn, defaultTimeLine, UNMATCHED_TRADING_DAY_STRATEGIES } from '../config/defaults'
 import { findIndexB } from '../helpers/helper'
 
 const RETURN_PROP = 'Return'
@@ -76,9 +77,9 @@ export const addReturns = (data, operationColumn) => {
 }
 /**
  * Calculate normal returns from observation market returns
- * @param {array} marketReturns - market returns for calculating CAPM regression
- * @param {array} stockReturns - stock returns for calculating CAMP regression
- * @param {array} observationMarketReturns - market prices used for prediction in CAPM regression
+ * @param {array} marketReturns - market returns for calculating MarketModel regression
+ * @param {array} stockReturns - stock returns for calculating MarketModel regression
+ * @param {array} observationMarketReturns - market prices used for prediction in MarketModel regression
  * @return {array} - prediction normal returns
  * @private
  */
@@ -179,6 +180,7 @@ export const extractDateWindows = ({ stockData, marketData, timeline, type = MAR
     }
   }
 }
+
 /**
  * main part of our program to gather all services together
  * @param dateColumn {string}
@@ -188,28 +190,39 @@ export const extractDateWindows = ({ stockData, marketData, timeline, type = MAR
  * @param market {array}
  * @param timeline {object}
  * @param modelType {string}
+ * @param unmatchedTradingDayStrategy {string}
  * @return {object}
  */
-export const model = ({ date, stock, market, timeline, dateColumn, operationColumn }, modelType) => {
+export const model = ({ date, stock, market, timeline, dateColumn, operationColumn, unmatchedTradingDayStrategy }, modelType) => {
   // helpers
   const getReturnColumn = prop(RETURN_PROP)
-  const mapByReturnColumn = map(getReturnColumn)
   const getDateColumn = prop(dateColumn)
-  const isMarketModel = modelType === 'MARKET_MODEL'
-  const compareDateFunction = item => {
-    const currentDate = getDateColumn(item)
+  const mapByReturnColumn = map(getReturnColumn)
 
-    if (date > currentDate) return 1
-    else if (date < currentDate) return -1
+  const compareFunction = dateMoment => item => {
+    const value = getDateColumn(item)
+
+    if (dateMoment.isAfter(value)) return 1
+    else if (dateMoment.isBefore(value)) return -1
     else return 0
   }
-  const findDateIndex = findIndexB(compareDateFunction)
 
-  // extract timeline window from stock and market data
-  const dateIndexStock = findDateIndex(stock)
-  const dateIndexMarket = isMarketModel && findDateIndex(market)
+  const isMarketModel = modelType === 'MARKET_MODEL'
 
   const sliceRequiredPriceItems = index => slice(index - timeline.T1E - timeline.T0T1, index + timeline.ET2 + timeline.T2T3 + 1)
+
+  // date index in stock data
+  const dateIndexStock = findIndexB(compareFunction(moment(date)), stock, unmatchedTradingDayStrategy)
+
+  if (dateIndexStock === -1) return `${date} does not exist in stock dataset`
+
+  // override date if strategy is to get next or previous date
+  if (getDateColumn(stock[dateIndexStock]) !== date) date = getDateColumn(stock[dateIndexStock])
+
+  // date index in market data
+  const dateIndexMarket = isMarketModel && findIndexB(compareFunction(moment(date)), market, unmatchedTradingDayStrategy)
+
+  if (isMarketModel && dateIndexMarket === -1) return `${date} does not exist in market dataset`
 
   // slice prices to gain just required data
   const slicedStock = sliceRequiredPriceItems(dateIndexStock)(stock)
@@ -225,9 +238,7 @@ export const model = ({ date, stock, market, timeline, dateColumn, operationColu
   const stockWithReturns = addReturns(slicedStock, operationColumn)
   const marketWithReturns = isMarketModel && addReturns(slicedMarket, operationColumn)
 
-  if (dateIndexStock === -1) return `${date} does not exist in stock dataset`
-  if (isMarketModel && dateIndexMarket === -1) return `${date} does not exist in market dataset`
-
+  // extract timeline window from stock and market data
   const timelineWindows = extractDateWindows({
     date,
     stockData: stockWithReturns,
@@ -297,6 +308,7 @@ export const model = ({ date, stock, market, timeline, dateColumn, operationColu
  * @param {object} [timeline]
  * @param {string} [dateColumn]
  * @param {string} [operationColumn]
+ * @param {string} [unmatchedTradingDayStrategy]
  * @returns {array<object>}
  */
 export const extractMarketModelRequiredInfo = ({
@@ -305,8 +317,9 @@ export const extractMarketModelRequiredInfo = ({
   market,
   timeline = defaultTimeLine,
   dateColumn = defaultDateColumn,
-  operationColumn = defaultOperationColumn }
-) => {
+  operationColumn = defaultOperationColumn,
+  unmatchedTradingDayStrategy = UNMATCHED_TRADING_DAY_STRATEGIES.SKIP
+}) => {
   return calendar.map((event = {}) => {
     return {
       date: event.date,
@@ -314,7 +327,8 @@ export const extractMarketModelRequiredInfo = ({
       market: event.market || market,
       timeline: event.timeline || timeline,
       dateColumn: event.dateColumn || dateColumn,
-      operationColumn: event.operationColumn || operationColumn
+      operationColumn: event.operationColumn || operationColumn,
+      unmatchedTradingDayStrategy: event.unmatchedTradingDayStrategy || unmatchedTradingDayStrategy
     }
   })
 }
@@ -325,6 +339,7 @@ export const extractMarketModelRequiredInfo = ({
  * @param {object} [timeline]
  * @param {string} [dateColumn]
  * @param {string} [operationColumn]
+ * @param {string} [unmatchedTradingDayStrategy]
  * @returns {array<object>}
  */
 export const extractMeanModelRequiredInfo = ({
@@ -332,15 +347,17 @@ export const extractMeanModelRequiredInfo = ({
   stock,
   timeline = defaultTimeLine,
   dateColumn = defaultDateColumn,
-  operationColumn = defaultOperationColumn }
-) => {
+  operationColumn = defaultOperationColumn,
+  unmatchedTradingDayStrategy = UNMATCHED_TRADING_DAY_STRATEGIES.SKIP
+}) => {
   return calendar.map((event = {}) => {
     return {
       date: event.date,
       stock: event.stock || stock,
       timeline: event.timeline || timeline,
       dateColumn: event.dateColumn || dateColumn,
-      operationColumn: event.operationColumn || operationColumn
+      operationColumn: event.operationColumn || operationColumn,
+      unmatchedTradingDayStrategy: event.unmatchedTradingDayStrategy || unmatchedTradingDayStrategy
     }
   })
 }

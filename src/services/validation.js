@@ -49,7 +49,6 @@ const calendarSchema = {
 
 export const validateCalendar = value => validate.single(value, calendarSchema)
 
-
 const MarketModelStructureSchema = {
   presence: true,
   type: 'array',

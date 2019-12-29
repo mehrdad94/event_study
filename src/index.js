@@ -48,4 +48,3 @@ export const MarketModel = data => eventStudy(data, MARKET_MODEL)
  * @return {object|string} - result object or validation result
  */
 export const MeanModel = data => eventStudy(data, MEAN_MODEL)
-

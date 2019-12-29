@@ -7,3 +7,8 @@ export const defaultTimeLine = {
 
 export const defaultOperationColumn = 'Close'
 export const defaultDateColumn = 'Date'
+export const UNMATCHED_TRADING_DAY_STRATEGIES = {
+  NEXT_TRADING_DAY: 'NEXT_TRADING_DAY',
+  PREV_TRADING_DAY: 'PREV_TRADING_DAY',
+  SKIP: 'SKIP'
+}

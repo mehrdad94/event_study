@@ -1,6 +1,7 @@
 /* global it expect describe */
 import { MarketModel, MeanModel } from './index'
 // @todo add more test to validate event study module
+import { UNMATCHED_TRADING_DAY_STRATEGIES } from './config/defaults'
 
 import APPL from './data/AAPL.json'
 import SP500 from './data/GSPC.json'
@@ -265,5 +266,43 @@ describe('should test library', function () {
     const result = MarketModel(data)[0]
 
     expect(result).toBe('2018-09-29 does not exist in stock dataset')
+  })
+
+  it('should perform operation on next trading date', function () {
+    const date = '2018-09-29'
+    const nextTradingDay = '2018-10-01'
+    const timeline = {
+      T0T1: 40,
+      T1E: 10,
+      ET2: 10,
+      T2T3: 2
+    }
+
+    const data = {
+      calendar: [{ date, timeline, market: SP500Full, stock: APPLFull, operationColumn, dateColumn, unmatchedTradingDayStrategy: UNMATCHED_TRADING_DAY_STRATEGIES.NEXT_TRADING_DAY }]
+    }
+
+    const result = MarketModel(data)[0]
+
+    expect(result.date).toBe(nextTradingDay)
+  })
+
+  it('should perform operation on previous trading date', function () {
+    const date = '2018-09-29'
+    const prevTradingDay = '2018-09-28'
+    const timeline = {
+      T0T1: 40,
+      T1E: 10,
+      ET2: 10,
+      T2T3: 2
+    }
+
+    const data = {
+      calendar: [{ date, timeline, market: SP500Full, stock: APPLFull, operationColumn, dateColumn, unmatchedTradingDayStrategy: UNMATCHED_TRADING_DAY_STRATEGIES.PREV_TRADING_DAY }]
+    }
+
+    const result = MarketModel(data)[0]
+
+    expect(result.date).toBe(prevTradingDay)
   })
 })

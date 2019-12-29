@@ -1,6 +1,7 @@
 import curry from 'ramda/src/curry'
+import { UNMATCHED_TRADING_DAY_STRATEGIES } from '../config/defaults'
 
-export const findIndexB = curry((compareFn, ar) => {
+export const findIndexB = curry((compareFn, ar, missingStrategy = UNMATCHED_TRADING_DAY_STRATEGIES.SKIP) => {
   let m = 0
   let n = ar.length - 1
   while (m <= n) {
@@ -15,5 +16,8 @@ export const findIndexB = curry((compareFn, ar) => {
       return k
     }
   }
-  return -1
+
+  if (missingStrategy === UNMATCHED_TRADING_DAY_STRATEGIES.NEXT_TRADING_DAY && ar[m]) return m
+  else if (missingStrategy === UNMATCHED_TRADING_DAY_STRATEGIES.PREV_TRADING_DAY && ar[n]) return n
+  else return -1
 })
